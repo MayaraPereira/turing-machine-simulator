@@ -1,7 +1,9 @@
 import React from 'react';
-import picture from '../../img/hqdefault.jpg';
+//import picture from '../../img/hqdefault.jpg';
+//        <img src={picture}></img>
 
 export default function Step() {
+  const simbol = '▷';
   return (
     <div>
       <ul id="tabs-swipe-demo" className="tabs">
@@ -17,7 +19,7 @@ export default function Step() {
           <a href="#swipe-3">Test 3</a>
         </li>
       </ul>
-      <div id="swipe-1" className="col s12 blue">
+      <div id="swipe-1" className="col s12 white">
         First tab content
         <table>
           <thead>
@@ -27,23 +29,24 @@ export default function Step() {
               <th>Item Price</th>
             </tr>
           </thead>
-
           <tbody>
             <tr>
-              <td>Alvin</td>
+              <td>{simbol}</td>
               <td>Eclair</td>
               <td>$0.87</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div id="swipe-2" className="col s12 red">
+      <div id="swipe-2" className="col s12 white">
         Second tab content
-        <img src={picture}></img>
       </div>
-      <div id="swipe-3" className="col s12 green">
+      <div id="swipe-3" className="col s12 white">
         Third tab content
       </div>
+      <a className="waves-effect waves-light btn" href="#swipe-2">
+        Next
+      </a>
     </div>
   );
 }

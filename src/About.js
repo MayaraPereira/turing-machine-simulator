@@ -1,10 +1,6 @@
 import React, { Fragment } from 'react';
-import Form from './components/Form/Form';
-import Step from './components/Steps/Step';
-//import logo from './img/logoTuring.png';
-//      <h1 style={styles.centeredTitle}>Turing Machine Simulator</h1>
 
-export default function App() {
+export default function About() {
   return (
     <Fragment>
       <nav>
@@ -49,14 +45,7 @@ export default function App() {
 
       <div className="container">
         <h1 style={styles.centeredTitle}>Turing Machine Simulator</h1>
-
-        <Form
-        /*filter={filter}
-        countryCount={filteredCountries.length}
-        totalPopulation={filteredPopulation}
-        onChangeFilter={handleChangeFilter}*/
-        />
-        <Step />
+        <h2>Hello, About!</h2>
       </div>
     </Fragment>
   );

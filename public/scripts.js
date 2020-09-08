@@ -7,4 +7,5 @@ function start() {
       responsiveThreshold: 1920,
     });
   });
+  $('.button-collapse').sideNav();
 }
