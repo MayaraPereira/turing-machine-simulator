@@ -3,7 +3,30 @@
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+}
+
+.flexRowElements {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.borderAll {
   border: 1px solid lightgray;
   border-radius: 5px;
   padding: 5px;
+  width: 70%;
+  margin: 0px 0.8rem 0px 0px;
+}
+
+.divInput {
+  border: 1px solid #ccc;
+  height: 35px;
+  width: 440px;
+}
+
+table,
+th,
+td {
+  border: 1px solid gray;
 }
