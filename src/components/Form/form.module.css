@@ -3,6 +3,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  margin: 0.5rem 0.8rem 0 0.5rem;
 }
 
 .flexRowElements {
@@ -16,7 +17,7 @@
   border-radius: 5px;
   padding: 5px;
   margin: 0px 0.8rem 0px 0px;
-  width: 100%;
+  width: 110%;
 }
 
 .divInput {
@@ -29,4 +30,16 @@ table,
 th,
 td {
   border: 1px solid gray;
+}
+
+h2 {
+  font-size: 2.56rem;
+  color: white;
+  background-color: #26a69a;
+  line-height: 111%;
+  margin: 0.373333rem 2rem 1.424rem 0;
+  border: 1px solid #26a69a;
+  border-radius: 16px 5px;
+  padding: 5px;
+  cursor: default;
 }

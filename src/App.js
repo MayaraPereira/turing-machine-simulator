@@ -1,14 +1,12 @@
 import React, { Fragment } from 'react';
 import Form from './components/Form/Form';
 import Step from './components/Steps/Step';
-//import logo from './img/logoTuring.png';
-//      <h1 style={styles.centeredTitle}>Turing Machine Simulator</h1>
 
 export default function App() {
   return (
     <Fragment>
       <nav>
-        <div className="nav-wrapper" style={{ backgroundColor: '#2F4F4F' }}>
+        <div className="nav-wrapper" style={styles.nav}>
           <a href="#!" data-activates="menu-mobile" className="button-collapse">
             <i className="material-icons">menu</i>
           </a>
@@ -23,23 +21,19 @@ export default function App() {
               <a href="/about">Sobre</a>
             </li>
           </ul>
-          <ul
-            className="side-nav"
-            id="menu-mobile"
-            style={{ backgroundColor: '#2F4F4F' }}
-          >
+          <ul className="side-nav" id="menu-mobile" style={styles.nav}>
             <li>
-              <a href="/" style={{ color: 'white' }}>
+              <a href="/" style={styles.optionsMenu}>
                 Simulador
               </a>
             </li>
             <li>
-              <a href="/instructions" style={{ color: 'white' }}>
+              <a href="/instructions" style={styles.optionsMenu}>
                 Como usar?
               </a>
             </li>
             <li>
-              <a href="/about" style={{ color: 'white' }}>
+              <a href="/about" style={styles.optionsMenu}>
                 Sobre
               </a>
             </li>
@@ -50,12 +44,14 @@ export default function App() {
       <div className="container">
         <h1 style={styles.centeredTitle}>Turing Machine Simulator</h1>
 
-        <Form
-        /*filter={filter}
+        <div style={{ justifyContent: 'center' }}>
+          <Form
+          /*filter={filter}
         countryCount={filteredCountries.length}
         totalPopulation={filteredPopulation}
         onChangeFilter={handleChangeFilter}*/
-        />
+          />
+        </div>
         <Step />
       </div>
     </Fragment>
@@ -66,5 +62,11 @@ const styles = {
   centeredTitle: {
     textAlign: 'center',
     color: '#708090',
+  },
+  nav: {
+    backgroundColor: '#2F4F4F',
+  },
+  optionsMenu: {
+    color: 'white',
   },
 };
