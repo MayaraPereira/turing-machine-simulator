@@ -4,8 +4,46 @@ import css from './step.module.css';
 //import picture from '../../img/hqdefault.jpg';
 //        <img src={picture}></img>
 
-export default function Step() {
+export default function Step({ func, input, initial, final }) {
+  console.log('Funcoes ' + JSON.stringify(func));
+  console.log('input ' + JSON.stringify(input));
+  console.log('initial ' + JSON.stringify(initial));
+  console.log('final ' + JSON.stringify(final));
   //const simbol = '▷';
+  /*const [indexCurrentFunc, setIndexCurrentFunc] = useState();
+  const [currentFunc, setCurrentFunc] = useState();
+  const [currentState, setCurrentState] = useState();
+  const [indexCurrentInput, setIndexCurrentInput] = useState();
+  const [currentInput, setCurrentInput] = useState();
+
+  const handleButtonClick = () => {
+    if (!currentFunc) {
+      setCurrentInput(input[0]);
+      setIndexCurrentInput(0);
+
+      const firstFunction = func.find((f) => {
+        return f.src.includes('(q0,' + currentInput + ')');
+      });
+
+      if (firstFunction) {
+        setCurrentFunc(firstFunction);
+        setIndexCurrentFunc(func.indexOf(firstFunction));
+        setCurrentState('q0');
+
+        //firstFunction.indexOf('=') +
+      } else {
+        console.err('Entrada rejeitada');
+      }
+    } else {
+      setCurrentInput(input[indexCurrentInput + 1]);
+      setIndexCurrentInput(indexCurrentInput + 1);
+
+      const findFunction = func.find((f) => {
+        return f.src.includes('(q0,' + currentInput + ')');
+      });
+    }
+  };*/
+
   return (
     <div>
       <div className={css.maqTuring}>
@@ -56,6 +94,9 @@ export default function Step() {
       </a>
       <a className="waves-effect waves-light btn" href="#swipe-3">
         ▸▸
+      </a>
+      <a href="!#" style={{ paddingLeft: '1.5rem' }}>
+        Próxima função a ser processada:
       </a>
     </div>
   );

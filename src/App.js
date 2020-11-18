@@ -1,6 +1,5 @@
 import React, { Fragment } from 'react';
 import Form from './components/Form/Form';
-import Step from './components/Steps/Step';
 
 export default function App() {
   return (
@@ -52,7 +51,6 @@ export default function App() {
         onChangeFilter={handleChangeFilter}*/
           />
         </div>
-        <Step />
       </div>
     </Fragment>
   );

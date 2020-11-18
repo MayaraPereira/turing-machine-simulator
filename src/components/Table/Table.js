@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Table({ func }) {
+export default function Table({ func, title }) {
   /*const handleInputChange = (event) => {
     const newText = event.target.value;
 
@@ -15,7 +15,7 @@ export default function Table({ func }) {
     <table style={styles.table}>
       <thead>
         <tr>
-          <td style={styles.rowTitle}>Funções de Transição</td>
+          <td style={styles.rowTitle}>{title}</td>
         </tr>
       </thead>
       <tbody>
@@ -34,7 +34,8 @@ export default function Table({ func }) {
 const styles = {
   table: {
     width: '50%',
-    margin: '0.9rem 1rem 3px 25%',
+    //margin: '0.9rem 1rem 3px 25%',
+    margin: '0.9rem 4rem 0rem 2rem',
   },
   rowTitle: {
     textAlign: 'center',
