@@ -21,7 +21,17 @@ export default function Form(props) {
   ]);
   const [funcOne, setFuncOne] = useState();
   const [funcTwo, setFuncTwo] = useState();
-  const [input, setInput] = useState();
+  const [input, setInput] = useState([
+    '-',
+    '-',
+    '-',
+    '-',
+    '-',
+    '-',
+    '-',
+    '-',
+    '-',
+  ]);
   const [lookInput, setLookInput] = useState();
   const [initialState, setInitialState] = useState();
   const [lookInitialState, setLookInitialState] = useState();
@@ -122,6 +132,12 @@ export default function Form(props) {
   };
 
   const handleInputButtonClick = () => {
+    if (lookInput.length < 9) {
+      let size = lookInput.length;
+      for (let index = size - 1; index < 10; index++) {
+        setLookInput(lookInput + ' ');
+      }
+    }
     setInput(lookInput);
   };
 
