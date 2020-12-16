@@ -4,7 +4,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin: 3rem 0px 7rem 0px;
+  margin: 5rem 0px 7rem 0px;
 }
 
 table,
@@ -13,6 +13,11 @@ td {
   border: 1px solid #000;
   border-collapse: collapse;
   padding: 8px 12px;
+}
+
+td {
+  min-width: 2.5rem;
+  max-width: 2.5rem;
 }
 
 .label {
