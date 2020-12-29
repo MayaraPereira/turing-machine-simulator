@@ -1,19 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import css from './step.module.css';
 
-//import picture from '../../img/hqdefault.jpg';
-//        <img src={picture}></img>
 const INITIAL_SIMBOL = '▷';
 const POINTER_SIMBOL = '⇧';
 
-export default function Step({ func, input, initial, final }) {
-  console.log('Funcoes ' + JSON.stringify(func));
-  console.log('input ' + JSON.stringify(input));
-  console.log('initial ' + JSON.stringify(initial));
-  console.log('final ' + JSON.stringify(final));
-
+export default function Step({ func, input, initial, final, updateInput }) {
+  console.log('input' + input);
   //constante que define localizacao do apontador
-  const [pointerControll] = useState([
+  const [pointerControll, setPointerControll] = useState([
     true,
     false,
     false,
@@ -25,55 +19,55 @@ export default function Step({ func, input, initial, final }) {
     false,
     false,
   ]);
+  //variavel que armazena um contador auxiliar para renderizacao das células da fita
+  let counterPointer = 0;
   //constante que armazena as funcoes de transicao como objetos
   const [funcObject, setFuncObject] = useState([]);
-
-  /*const [indexCurrentFunc, setIndexCurrentFunc] = useState();
-  const [currentFunc, setCurrentFunc] = useState();
+  //constante que armazena o estado atual de processamento
   const [currentState, setCurrentState] = useState();
-  const [indexCurrentInput, setIndexCurrentInput] = useState();
+  //constante que armazena a parte do input que esta sendo lida
   const [currentInput, setCurrentInput] = useState();
+  //constante que armazena a funcao de transicao a ser exibida
+  const [currentFunc, setCurrentFunc] = useState('');
+  //constante que armazena a funcao de transicao a ser processada
+  const [currentFuncProcessing, setCurrentFuncProcessing] = useState();
 
-  const handleButtonClick = () => {
-    if (!currentFunc) {
-      setCurrentInput(input[0]);
-      setIndexCurrentInput(0);
-
-      const firstFunction = func.find((f) => {
-        return f.src.includes('(q0,' + currentInput + ')');
-      });
-
-      if (firstFunction) {
-        setCurrentFunc(firstFunction);
-        setIndexCurrentFunc(func.indexOf(firstFunction));
-        setCurrentState('q0');
-
-        //firstFunction.indexOf('=') +
-      } else {
-        console.err('Entrada rejeitada');
+  /*A partir da atualização da currentFuncProcessing (funcao atual a ser processada)
+   * o fluxo de processamento ocorre
+   */
+  useEffect(() => {
+    if (currentFuncProcessing) {
+      let auxArray = pointerControll;
+      const indexTrue = pointerControll.indexOf(true);
+      updateInput(currentFuncProcessing.destination.writer, indexTrue - 1);
+      switch (currentFuncProcessing.destination.moviment) {
+        case '>':
+          auxArray[indexTrue] = false;
+          auxArray[indexTrue + 1] = true;
+          setPointerControll(auxArray);
+          setCurrentState(currentFuncProcessing.destination.state);
+          setCurrentInput({ index: indexTrue + 1, str: input[indexTrue + 1] });
+          break;
+        case '<':
+          if (indexTrue > 1) {
+            auxArray[indexTrue] = false;
+            auxArray[indexTrue - 1] = true;
+            setPointerControll(auxArray);
+            setCurrentState(currentFuncProcessing.destination.state);
+            setCurrentInput({
+              index: indexTrue - 1,
+              str: input[indexTrue - 1],
+            });
+          } else {
+            setCurrentFunc('Palavra Rejeitada!');
+          }
+          break;
+        default:
+          setCurrentFunc('Movimento Inválido!');
+          break;
       }
-    } else {
-      setCurrentInput(input[indexCurrentInput + 1]);
-      setIndexCurrentInput(indexCurrentInput + 1);
-
-      const findFunction = func.find((f) => {
-        return f.src.includes('(q0,' + currentInput + ')');
-      });
     }
-  };*/
-
-  /* Metodo que recupera parte do input a ser exibida na fita */
-  /*const retrieveInput = () => {
-    let value = null;
-    if (input[counterRetrieve]) {
-      value = input[counterRetrieve];
-    } else {
-      value = '';
-    }
-
-    counterRetrieve++;
-    return value;
-  };*/
+  }, [currentFuncProcessing, pointerControll]);
 
   /*Método disparado ao clicar no botão de próximo passo
    * Se for o primeiro passo, ele transforma todas as funcoes de transicao em objetos
@@ -81,8 +75,9 @@ export default function Step({ func, input, initial, final }) {
    */
   const handleNextStepButtonClick = () => {
     //Primeiro if transforma todas as funcoes de transicao em objetos
+    let arrayObject;
     if (pointerControll.indexOf(true) === 0) {
-      let arrayObject = func.map((funcaoComplete) => {
+      arrayObject = func.map((funcaoComplete) => {
         let funcao = funcaoComplete.str;
         let counter = 2;
         let stateOrigin = '';
@@ -136,6 +131,7 @@ export default function Step({ func, input, initial, final }) {
           }
         }
         return {
+          id: funcaoComplete.id,
           origin: { state: stateOrigin, input: inputRead },
           destination: {
             state: stateWhither,
@@ -144,26 +140,57 @@ export default function Step({ func, input, initial, final }) {
           },
         };
       });
-      setFuncObject(arrayObject);
-      console.log('objetos ' + JSON.stringify(funcObject));
+      let auxArray = funcObject;
+      for (let index = 1; index < arrayObject.length; index++) {
+        auxArray.push(arrayObject[index]);
+      }
+      setFuncObject(auxArray);
+      setPointerControll([
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+      ]);
+      setCurrentState(initial);
+      setCurrentInput({ index: 0, str: input[0] });
+    } else {
+      if (currentFunc !== 'Palavra rejeitada!') {
+        let functionSelected = funcObject.filter((funcao) => {
+          return (
+            currentState === funcao.origin.state &&
+            currentInput.str === funcao.origin.input
+          );
+        });
+        if (functionSelected.length > 0 && !final.includes(currentState)) {
+          let objCurrentFunc = func[functionSelected[0].id - 1];
+          setCurrentFunc(objCurrentFunc.str);
+
+          let objCurrentFuncProcessing = funcObject[functionSelected[0].id - 2];
+          setCurrentFuncProcessing({
+            destination: {
+              moviment: objCurrentFuncProcessing.destination.moviment,
+              state: objCurrentFuncProcessing.destination.state,
+              writer: objCurrentFuncProcessing.destination.writer,
+            },
+            id: objCurrentFuncProcessing.id,
+            origin: {
+              input: objCurrentFuncProcessing.origin.input,
+              state: objCurrentFuncProcessing.origin.state,
+            },
+          });
+        } else if (final.includes(currentState)) {
+          setCurrentFunc('Palavra Aceita!');
+        } else {
+          setCurrentFunc('Palavra rejeitada!');
+        }
+      }
     }
-    /*setInitialState(lookInitialState);
-    if (lookInitialState) {
-      let strFormat = `${STR_INITIAL_STATE_DEFAULT} ${lookInitialState.replace(
-        ' ',
-        ''
-      )}`;
-      currentStates.find((state) => {
-        return state.id === 1;
-      }).str = strFormat;
-
-      const arrayStates = [];
-      arrayStates.push(currentStates[0]);
-      arrayStates.push(currentStates[1]);
-
-      arrayStates[0].str = strFormat;
-      setCurrentStates(arrayStates);
-    }*/
   };
 
   return (
@@ -172,17 +199,29 @@ export default function Step({ func, input, initial, final }) {
         <table style={styles.table}>
           <tbody style={styles.tbody}>
             <tr>
-              <td style={styles.td}>{INITIAL_SIMBOL}</td>
-              <td style={styles.td}>{input[0]}</td>
-              <td style={styles.td}>{input[1]}</td>
-              <td style={styles.td}>{input[2]}</td>
-              <td style={styles.td}>{input[3]}</td>
-              <td style={styles.td}>{input[4]}</td>
-              <td style={styles.td}>{input[5]}</td>
-              <td style={styles.td}>{input[6]}</td>
-              <td style={styles.td}>{input[7]}</td>
-              <td style={styles.td}>{input[8]}</td>
-              <td style={styles.td}>...</td>
+              {pointerControll.map((pointer) => {
+                let index = counterPointer;
+                counterPointer++;
+                if (index === 0 && pointer === true) {
+                  return <td style={styles.tdSelected}>{INITIAL_SIMBOL}</td>;
+                } else if (index === 0 && pointer !== true) {
+                  return <td style={styles.td}>{INITIAL_SIMBOL}</td>;
+                } else if (
+                  index !== 0 &&
+                  pointer === true &&
+                  index < pointerControll.length - 1
+                ) {
+                  return <td style={styles.tdSelected}>{input[index - 1]}</td>;
+                } else if (
+                  index !== 0 &&
+                  pointer === false &&
+                  index < pointerControll.length - 1
+                ) {
+                  return <td style={styles.td}>{input[index - 1]}</td>;
+                } else {
+                  return <td style={styles.td}>...</td>;
+                }
+              })}
             </tr>
           </tbody>
         </table>
@@ -193,14 +232,14 @@ export default function Step({ func, input, initial, final }) {
                 if (pointer && pointer === pointerControll[0]) {
                   return (
                     <td style={styles.tdPointerIcon}>
-                      <icon style={styles.iconPointer}>{POINTER_SIMBOL}</icon>
+                      <span style={styles.iconPointer}>{POINTER_SIMBOL}</span>
                     </td>
                   );
                 } else if (pointer && pointer !== pointerControll[0]) {
                   return (
                     <td style={styles.tdPointerIcon}>
-                      <icon style={styles.iconPointer}>{POINTER_SIMBOL}</icon>
-                      <span style={styles.spanPointer}>q0</span>
+                      <span style={styles.iconPointer}>{POINTER_SIMBOL}</span>
+                      <span style={styles.spanPointer}>{currentState}</span>
                     </td>
                   );
                 } else {
@@ -211,23 +250,29 @@ export default function Step({ func, input, initial, final }) {
           </tbody>
         </table>
       </div>
-      <a
-        className="waves-effect waves-light btn"
-        href="#swipe-2"
-        style={{ marginRight: '2%' }}
-      >
-        ◂◂
-      </a>
-      <a
-        className="waves-effect waves-light btn"
-        href="#!"
-        onClick={handleNextStepButtonClick}
-      >
-        ▸▸
-      </a>
-      <a href="!#" style={{ paddingLeft: '1.5rem' }}>
-        Próxima função a ser processada:
-      </a>
+      <div style={styles.footer}>
+        <div style={styles.btnFooter}>
+          <a
+            className="waves-effect waves-light btn"
+            href="#swipe-2"
+            style={{ marginRight: '2%' }}
+          >
+            ◂◂
+          </a>
+          <a
+            className="waves-effect waves-light btn"
+            href="#!"
+            onClick={handleNextStepButtonClick}
+          >
+            ▸▸
+          </a>
+        </div>
+        <div style={styles.legendFooter}>
+          <span style={styles.legendFeedback}>
+            Função processada: {currentFunc}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -245,6 +290,13 @@ const styles = {
     fontSize: '1.5rem',
   },
   td: {
+    border: '1px solid rgb(0, 0, 0)',
+    borderCollapse: 'collapse',
+    padding: '8px 12px',
+    textAlign: 'center',
+  },
+  tdSelected: {
+    backgroundColor: '#CD5C5C',
     border: '1px solid rgb(0, 0, 0)',
     borderCollapse: 'collapse',
     padding: '8px 12px',
@@ -285,5 +337,18 @@ const styles = {
     paddingTop: '9px',
     paddingBottom: '9px',
     minWidth: '3rem',
+  },
+  footer: {
+    display: 'flex',
+  },
+  btnFooter: {
+    minWidth: '8.5rem',
+  },
+  legendFooter: {
+    paddingLeft: '1.5rem',
+  },
+  legendFeedback: {
+    fontWeight: 'bold',
+    color: 'gray',
   },
 };

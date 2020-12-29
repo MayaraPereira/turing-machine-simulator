@@ -1,4 +1,6 @@
 import React, { Fragment, useState } from 'react';
+/*import { makeStyles } from '@material-ui/core/styles';
+import Modal from '@material-ui/core/Modal';*/
 
 import css from './form.module.css';
 import Table from '../Table/Table';
@@ -38,11 +40,23 @@ export default function Form(props) {
   const [finalStates, setFinalStates] = useState();
   const [lookFinalStates, setLookFinalStates] = useState();
 
+  /*Modal
+  //Controla abertura e fechamento do modal
+  const [open, setOpen] = useState(false);
+  //Define o titulo do modal
+  const [modalTitle, setModalTitle] = useState('');
+  //Define descricao do modal
+  const [modalDescription, setModalDescription] = useState('');
+  //Define estilo do modal
+  const [modalStyle] = useState(getModalStyle);
+  const classes = useStyles();*/
+
+  //Metodo que armazena o estado inicial
   const handleInitialStateButtonClick = () => {
     setInitialState(lookInitialState);
     if (lookInitialState) {
       let strFormat = `${STR_INITIAL_STATE_DEFAULT} ${lookInitialState.replace(
-        ' ',
+        /( )+/g,
         ''
       )}`;
       currentStates.find((state) => {
@@ -58,11 +72,12 @@ export default function Form(props) {
     }
   };
 
+  //Metodo que armazena os estados finais
   const handleFinalStatesButtonClick = () => {
     setFinalStates(lookFinalStates);
     if (lookFinalStates) {
       let strFormat = `${STR_FINAL_STATES_DEFAULT}${lookFinalStates.replace(
-        ' ',
+        /( )+/g,
         ''
       )}}`;
       currentStates.find((state) => {
@@ -78,12 +93,13 @@ export default function Form(props) {
     }
   };
 
+  //Metodo que armazena as funcoes de transicao como uma string
   const handleButtonClick = () => {
     if (funcOne && funcTwo) {
       let strFormat = PI + '(';
       if (funcOne.indexOf(',') !== -1 && funcTwo.indexOf(',') !== -1) {
-        strFormat += `${funcOne.replace(' ', '')}) = (${funcTwo.replace(
-          ' ',
+        strFormat += `${funcOne.replace(/( )+/g, '')}) = (${funcTwo.replace(
+          /( )+/g,
           ''
         )})`;
         const arrayFunctions = [];
@@ -106,39 +122,128 @@ export default function Form(props) {
     setFuncTwo('');
   };
 
+  //Metodo que guarda qualquer valor digitado no campo 'estado inicial'
   const handleInitialStateInputChange = (event) => {
     const { value } = event.target;
     setLookInitialState(value);
   };
 
+  //Metodo que guarda qualquer valor digitado no campo 'estados finais'
   const handleFinalStatesInputChange = (event) => {
     const { value } = event.target;
     setLookFinalStates(value);
   };
 
+  //Metodo que guarda qualquer valor digitado no primeiro campo de funcoes de transicao
   const handleFirstInputChange = (event) => {
     const { value } = event.target;
     setFuncOne(value);
   };
 
+  //Metodo que guarda qualquer valor digitado no segundo campo de funcoes de transicao
   const handleSecondInputChange = (event) => {
     const { value } = event.target;
     setFuncTwo(value);
   };
 
+  //Metodo que guarda qualquer valor digitado no campo 'entrada'
   const handleThirdInputChange = (event) => {
     const { value } = event.target;
-    setLookInput(value);
+    if (value.replace(/( )+/g, '') && value.replace(/( )+/g, '').length < 9) {
+      let size = value.replace(/( )+/g, '').length;
+      let white = value.replace(/( )+/g, '');
+      for (let index = size - 1; index < 10; index++) {
+        white += '-';
+      }
+      setLookInput(white);
+    } else {
+      setLookInput(value.replace(/( )+/g, ''));
+    }
   };
 
+  /*Metodo que define a entrada a ser processada e exibida
+   * a partir do valor informado pelo usuario
+   */
   const handleInputButtonClick = () => {
-    if (lookInput.length < 9) {
-      let size = lookInput.length;
-      for (let index = size - 1; index < 10; index++) {
-        setLookInput(lookInput + ' ');
+    if (lookInput) {
+      setInput(lookInput);
+    }
+  };
+
+  /*Método para abrir modal de informacoes
+  const handleOpen = () => {
+    setOpen(true);
+    setModalTitle('Passo 1 - Estado inicial');
+    setModalDescription('Estado inicial.');
+  };
+
+  //Método para fechar modal de informacoes
+  const handleClose = () => {
+    setOpen(false);
+    setModalTitle('');
+    setModalDescription('');
+  };
+
+  //Calcula posicionamento do modal
+  function rand() {
+    return Math.round(Math.random() * 20) - 10;
+  }
+
+  //Define style do modal
+  function getModalStyle() {
+    const top = 50 + rand();
+    const left = 50 + rand();
+
+    return {
+      top: `${top}%`,
+      left: `${left}%`,
+      transform: `translate(-${top}%, -${left}%)`,
+    };
+  }
+
+  //Define style
+  const useStyles = makeStyles((theme) => ({
+    paper: {
+      position: 'absolute',
+      width: 400,
+      backgroundColor: theme.palette.background.paper,
+      border: '2px solid #000',
+      boxShadow: theme.shadows[5],
+      padding: theme.spacing(2, 4, 3),
+    },
+  }));
+
+  //define body do modal de informações
+  const body = (
+    <div style={modalStyle} className={classes.paper}>
+      <h2 id="simple-modal-title">{modalTitle}</h2>
+      <p id="simple-modal-description">{modalDescription}</p>
+    </div>
+  );
+  
+  <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+      >
+        {body}
+      </Modal>
+  */
+
+  //Metodo que atualiza input a partir da escrita na pilha
+  const updateInput = (str, indexNew) => {
+    let strAux = '';
+    for (let index = 0; index < input.length; index++) {
+      if (indexNew === index) {
+        strAux += str;
+      } else {
+        strAux += input[index];
       }
     }
-    setInput(lookInput);
+    if (strAux !== '') {
+      setInput(strAux);
+    }
   };
 
   return (
@@ -146,7 +251,10 @@ export default function Form(props) {
       <div className={css.flexRowElements}>
         <div className={css.borderAll}>
           <div className={css.flexRow}>
-            <h2 title="Defina o estado inicial (q0) e clique no botão 'OK'">
+            <h2
+              title="Defina o estado inicial (q0) e clique no botão 'OK'"
+              //onClick={handleOpen}
+            >
               1
             </h2>
             <span style={styles.initialStateSpan}>
@@ -262,6 +370,7 @@ export default function Form(props) {
         input={input}
         initial={initialState}
         final={finalStates}
+        updateInput={updateInput}
       />
     </Fragment>
   );
