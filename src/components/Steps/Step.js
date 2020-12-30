@@ -31,6 +31,8 @@ export default function Step({ func, input, initial, final, updateInput }) {
   const [currentFunc, setCurrentFunc] = useState('');
   //constante que armazena a funcao de transicao a ser processada
   const [currentFuncProcessing, setCurrentFuncProcessing] = useState();
+  //constante que armazena o valor inicial da entrada processada
+  const [copyInput, setCopyInput] = useState();
 
   /*A partir da atualização da currentFuncProcessing (funcao atual a ser processada)
    * o fluxo de processamento ocorre
@@ -77,6 +79,7 @@ export default function Step({ func, input, initial, final, updateInput }) {
     //Primeiro if transforma todas as funcoes de transicao em objetos
     let arrayObject;
     if (pointerControll.indexOf(true) === 0) {
+      setCopyInput(input);
       arrayObject = func.map((funcaoComplete) => {
         let funcao = funcaoComplete.str;
         let counter = 2;
@@ -193,6 +196,36 @@ export default function Step({ func, input, initial, final, updateInput }) {
     }
   };
 
+  /*Método disparado ao clicar no botão de passo anterior
+   * Se o apontador estiver no símbolo inicial da fita, não ocorre nenhuma ação
+   * Senao, atualiza dados de processamento de acordo com as funções processadas
+   */
+  const handlePreviousStepButtonClick = () => {
+    if (pointerControll.indexOf(true) !== 0) {
+      console.log('entrou aqui');
+    }
+  };
+
+  const handleAllPreviousStepButtonClick = () => {
+    updateInput(copyInput, -1);
+    setCurrentState();
+    setCurrentInput();
+    setCurrentFunc('');
+    setCurrentFuncProcessing();
+    setPointerControll([
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+    ]);
+  };
+
   return (
     <div>
       <div className={css.maqTuring}>
@@ -250,12 +283,34 @@ export default function Step({ func, input, initial, final, updateInput }) {
           </tbody>
         </table>
       </div>
+      <div style={{ marginBottom: '1%' }}>
+        <a
+          className="waves-effect waves-light btn"
+          href="#!"
+          onClick={handleAllPreviousStepButtonClick}
+          style={{ marginRight: '0.5rem', fontSize: 'x-large' }}
+          title="Reseta todo o processamento, liberando a troca de entrada, caso desejado"
+        >
+          ⭰
+        </a>
+        <a
+          className="waves-effect waves-light btn"
+          href="#!"
+          onClick={handleNextStepButtonClick}
+          style={{ fontSize: 'x-large' }}
+          title="Avança até o último passo do processamento da entrada, exibindo o feedback final"
+        >
+          ⭲
+        </a>
+      </div>
       <div style={styles.footer}>
         <div style={styles.btnFooter}>
           <a
             className="waves-effect waves-light btn"
-            href="#swipe-2"
+            href="#!"
             style={{ marginRight: '2%' }}
+            onClick={handlePreviousStepButtonClick}
+            title="Retrocede um passo no processamento da entrada"
           >
             ◂◂
           </a>
@@ -263,12 +318,16 @@ export default function Step({ func, input, initial, final, updateInput }) {
             className="waves-effect waves-light btn"
             href="#!"
             onClick={handleNextStepButtonClick}
+            title="Avança um passo no processamento da entrada"
           >
             ▸▸
           </a>
         </div>
         <div style={styles.legendFooter}>
-          <span style={styles.legendFeedback}>
+          <span
+            style={styles.legendFeedback}
+            title="Exibe feedback final ou função de transição que foi utilizada para o processamento da entrada"
+          >
             Função processada: {currentFunc}
           </span>
         </div>
@@ -340,6 +399,7 @@ const styles = {
   },
   footer: {
     display: 'flex',
+    marginBottom: '2rem',
   },
   btnFooter: {
     minWidth: '8.5rem',
