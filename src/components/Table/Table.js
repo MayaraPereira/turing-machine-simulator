@@ -35,7 +35,7 @@ const styles = {
   table: {
     width: '50%',
     //margin: '0.9rem 1rem 3px 25%',
-    margin: '0.9rem 0rem 0rem 0.5rem',
+    margin: '0.9rem 0rem 2rem 0.5rem',
   },
   rowTitle: {
     textAlign: 'center',

@@ -33,6 +33,10 @@ export default function Form() {
   const [funcOne, setFuncOne] = useState();
   //constante que armazena segunda parte da funcao de transicao incluida pelo usuario
   const [funcTwo, setFuncTwo] = useState();
+  //constante que armazena primeira parte da funcao de transicao incluida pelo usuario para edicao/exclusao
+  const [editFuncOne, setEditFuncOne] = useState();
+  //constante que armazena segunda parte da funcao de transicao incluida pelo usuario para edicao/exclusao
+  const [editFuncTwo, setEditFuncTwo] = useState();
   //constante que armazena entrada a ser processada
   const [input, setInput] = useState([
     '-',
@@ -57,6 +61,8 @@ export default function Form() {
   const [lookFinalStates, setLookFinalStates] = useState();
   //constante que controla exibicao dos passos
   const [toOmit, setToOmit] = useState(false);
+  //constante que controla exibicao do box de edicao das funcoes de transicao
+  const [toOmitEditFunctions, setToOmitEditFunctions] = useState(false);
   //constante que controla parcialmente o inicio do processamento
   const [allowedStart, setAllowedStart] = useState(true);
 
@@ -126,6 +132,7 @@ export default function Form() {
           if (func.str.includes(funcOne.replace(/( )+/g, '') + ')')) {
             existFunc = true;
           }
+          return func;
         });
         if (!existFunc) {
           strFormat += `${funcOne.replace(/( )+/g, '')}) = (${funcTwo.replace(
@@ -146,11 +153,11 @@ export default function Form() {
           if (arrayFunctions.length > currentFunctions.length) {
             setCurrentFunctions(arrayFunctions);
           }
+          setFuncOne('');
+          setFuncTwo('');
         }
       }
     }
-    setFuncOne('');
-    setFuncTwo('');
   };
 
   //Metodo que processa qualquer valor digitado no campo 'estado inicial'
@@ -212,6 +219,131 @@ export default function Form() {
   //Metodo que omite a opcao de editar/alterar apos o clique do botao
   const handleEditButtonClick = () => {
     setToOmit(false);
+  };
+
+  //Metodo que exibe o box de edicao das funcoes de transicao apos o clique do botao
+  const handleEditFunctionsButtonClick = () => {
+    setToOmitEditFunctions(!toOmitEditFunctions);
+  };
+
+  //Metodo que inibe o box de edicao das funcoes de transicao apos o clique do botao fechar
+  const handleCloseEditFunctionsButtonClick = () => {
+    setToOmitEditFunctions(false);
+  };
+
+  //Metodo que atualiza as funcoes de transicao como uma string a partir do clique do botao de edicao
+  const handleEditFunctionButtonClick = () => {
+    if (editFuncOne && editFuncTwo) {
+      let strFormat = PI + '(';
+      if (editFuncOne.indexOf(',') !== -1 && editFuncTwo.indexOf(',') !== -1) {
+        let funcEdit = currentFunctions.find((func) => {
+          if (func.str.includes(editFuncOne.replace(/( )+/g, '') + ')')) {
+            return func;
+          }
+        });
+
+        if (funcEdit) {
+          strFormat += `${editFuncOne.replace(
+            /( )+/g,
+            ''
+          )}) = (${editFuncTwo.replace(/( )+/g, '')})`;
+          const arrayFunctions = [];
+          for (let index = 0; index < currentFunctions.length; index++) {
+            if (funcEdit.id === currentFunctions[index].id) {
+              arrayFunctions.push({
+                id: currentFunctions[index].id,
+                str: strFormat,
+              });
+            } else {
+              arrayFunctions.push(currentFunctions[index]);
+            }
+          }
+          if (arrayFunctions.length === currentFunctions.length) {
+            setCurrentFunctions(arrayFunctions);
+          }
+          setEditFuncOne('');
+          setEditFuncTwo('');
+        }
+      }
+    }
+  };
+
+  //Metodo excluir e atualiza as funcoes de transicao como uma string a partir do clique do botao de exclusao
+  const handleDeleteFunctionButtonClick = () => {
+    if (editFuncOne && editFuncTwo) {
+      if (editFuncOne.indexOf(',') !== -1 && editFuncTwo.indexOf(',') !== -1) {
+        let funcDelete = currentFunctions.find((func) => {
+          if (
+            func.str.includes(editFuncOne.replace(/( )+/g, '') + ')') &&
+            func.str.includes(editFuncTwo.replace(/( )+/g, '') + ')')
+          ) {
+            return func;
+          }
+        });
+        if (funcDelete) {
+          const arrayFunctions = [];
+          let indexDelete = 0;
+          for (let index = 0; index < currentFunctions.length; index++) {
+            if (funcDelete.id === currentFunctions[index].id) {
+              indexDelete = index;
+            } else {
+              if (indexDelete < index && indexDelete !== 0) {
+                arrayFunctions.push({
+                  id: currentFunctions[index].id - 1,
+                  str: currentFunctions[index].str,
+                });
+              } else {
+                arrayFunctions.push(currentFunctions[index]);
+              }
+            }
+          }
+          if (arrayFunctions.length < currentFunctions.length) {
+            setCurrentFunctions(arrayFunctions);
+          }
+          setEditFuncOne('');
+          setEditFuncTwo('');
+        }
+      }
+    }
+  };
+
+  //Metodo que processa qualquer valor digitado no primeiro campo de funcoes de transicao para edicao/exclusao
+  const handleFirstInputEditFunctionChange = (event) => {
+    const { value } = event.target;
+    setEditFuncOne(value);
+  };
+
+  //Metodo que processa qualquer valor digitado no segundo campo de funcoes de transicao para edicao/exclusao
+  const handleSecondInputEditFunctionChange = (event) => {
+    const { value } = event.target;
+    setEditFuncTwo(value);
+  };
+
+  //Metodo que reseta toda a maquina criada apos o clique do botao resetar maquina
+  const handleAllResetButtonClick = () => {
+    setCurrentFunctions([{ id: 1, str: STR_PADRAO }]);
+    setCurrentStates([
+      { id: 1, str: STR_INITIAL_STATE_DEFAULT },
+      { id: 2, str: STR_FINAL_STATES_DEFAULT + '}' },
+      {
+        id: 3,
+        str:
+          '▷ : símbolo marcador de início da fita. Copie e cole para incluir a função programa que inicia o processamento.',
+      },
+    ]);
+    setFuncOne();
+    setFuncTwo();
+    setEditFuncOne();
+    setEditFuncTwo();
+    setInput(['-', '-', '-', '-', '-', '-', '-', '-', '-']);
+    setLookInput();
+    setInitialState();
+    setLookInitialState();
+    setFinalStates();
+    setLookFinalStates();
+    setToOmit(false);
+    setToOmitEditFunctions(false);
+    setAllowedStart(true);
   };
 
   /*Método para abrir modal de informacoes
@@ -324,7 +456,7 @@ export default function Form() {
                   style={styles.buttonsStatesSteps}
                   onClick={handleInitialStateButtonClick}
                 >
-                  <i className="material-icons">OK</i>
+                  OK
                 </a>
               </div>
               <div className={css.flexRow}>
@@ -349,7 +481,7 @@ export default function Form() {
                   style={styles.buttonsStatesSteps}
                   onClick={handleFinalStatesButtonClick}
                 >
-                  <i className="material-icons">OK</i>
+                  OK
                 </a>
               </div>
               <div className={css.flexRow}>
@@ -393,7 +525,109 @@ export default function Form() {
                 >
                   <i className="material-icons">add</i>
                 </a>
+                <a
+                  className="btn-floating btn-small waves-effect waves-light"
+                  href="#!"
+                  style={styles.buttonFunctionStep}
+                  title="Clique aqui para acessar as opções de edição das funções de transição ou reset de máquina."
+                  onClick={handleEditFunctionsButtonClick}
+                >
+                  {editSimbol}
+                </a>
               </div>
+              {toOmitEditFunctions && (
+                <div
+                  style={{
+                    backgroundColor: '#D7DED7',
+                    borderRadius: '5px',
+                    padding: '1rem',
+                  }}
+                >
+                  <div
+                    style={{
+                      marginBottom: '0.5rem',
+                      float: 'right',
+                      border: '1px solid rgb(158, 158, 158)',
+                      borderRadius: '2px',
+                      paddingLeft: '4px',
+                      paddingRight: '4px',
+                      cursor: 'pointer',
+                    }}
+                    onClick={handleCloseEditFunctionsButtonClick}
+                  >
+                    <span>X</span>
+                  </div>
+                  <span style={{ marginBottom: '0.5rem' }}>
+                    Editar ou excluir função de transição:
+                  </span>
+                  <div style={{ padding: '1rem' }}>
+                    <span style={{ marginRight: '0.3rem' }}>{`${PI}(`}</span>
+                    <input
+                      style={{
+                        border: '1px solid rgb(158, 158, 158)',
+                        padding: '1%',
+                        width: '40px',
+                        height: '30%',
+                        textAlign: 'center',
+                      }}
+                      title="função de transição"
+                      placeholder="p, au"
+                      onChange={handleFirstInputEditFunctionChange}
+                    />
+                    <span
+                      style={{ marginRight: '0.3rem', marginLeft: '0.3rem' }}
+                    >
+                      ) = (
+                    </span>
+                    <input
+                      style={{
+                        border: '1px solid rgb(158, 158, 158)',
+                        padding: '1%',
+                        width: '70px',
+                        height: '30%',
+                        textAlign: 'center',
+                      }}
+                      title="função de transição"
+                      placeholder="q, av, m"
+                      onChange={handleSecondInputEditFunctionChange}
+                    />
+                    <span style={{ marginLeft: '1%', marginRight: '0.5rem' }}>
+                      )
+                    </span>
+                    <a
+                      className="btn-floating btn-small waves-effect waves-light"
+                      href="#!"
+                      style={styles.buttonFunctionStep}
+                      onClick={handleEditFunctionButtonClick}
+                      title="Clique aqui para confirmar a edição da função informada"
+                    >
+                      ok
+                    </a>
+                    <a
+                      className="btn-floating btn-small waves-effect waves-light"
+                      href="#!"
+                      style={styles.buttonFunctionStep}
+                      onClick={handleDeleteFunctionButtonClick}
+                      title="Clique aqui para confirmar a exclusão da função informada"
+                    >
+                      x
+                    </a>
+                  </div>
+                  <div>
+                    <span>Resetar a máquina:</span>
+                    <div style={{ padding: '1rem' }}>
+                      <a
+                        className="waves-effect waves-light btn-small"
+                        href="#!"
+                        onClick={handleAllResetButtonClick}
+                        title="Ao clicar no botão, todas as informações da máquina serão perdidas."
+                      >
+                        RESETAR MÁQUINA
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           <div className={css.flexRow}>
