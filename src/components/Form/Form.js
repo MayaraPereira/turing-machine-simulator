@@ -23,6 +23,11 @@ export default function Form() {
   const [currentStates, setCurrentStates] = useState([
     { id: 1, str: STR_INITIAL_STATE_DEFAULT },
     { id: 2, str: STR_FINAL_STATES_DEFAULT + '}' },
+    {
+      id: 3,
+      str:
+        '▷ : símbolo marcador de início da fita. Copie e cole para incluir a função programa que inicia o processamento.',
+    },
   ]);
   //constante que armazena primeira parte da funcao de transicao incluida pelo usuario
   const [funcOne, setFuncOne] = useState();
@@ -81,6 +86,7 @@ export default function Form() {
       const arrayStates = [];
       arrayStates.push(currentStates[0]);
       arrayStates.push(currentStates[1]);
+      arrayStates.push(currentStates[2]);
 
       arrayStates[0].str = strFormat;
       setCurrentStates(arrayStates);
@@ -102,6 +108,7 @@ export default function Form() {
       const arrayStates = [];
       arrayStates.push(currentStates[0]);
       arrayStates.push(currentStates[1]);
+      arrayStates.push(currentStates[2]);
 
       arrayStates[1].str = strFormat;
       setCurrentStates(arrayStates);
@@ -112,24 +119,33 @@ export default function Form() {
   const handleButtonClick = () => {
     if (funcOne && funcTwo) {
       let strFormat = PI + '(';
+      let existFunc = false;
       if (funcOne.indexOf(',') !== -1 && funcTwo.indexOf(',') !== -1) {
-        strFormat += `${funcOne.replace(/( )+/g, '')}) = (${funcTwo.replace(
-          /( )+/g,
-          ''
-        )})`;
-        const arrayFunctions = [];
-        for (let index = 0; index <= currentFunctions.length; index++) {
-          if (index === currentFunctions.length) {
-            arrayFunctions.push({
-              id: currentFunctions.length + 1,
-              str: strFormat,
-            });
-          } else {
-            arrayFunctions.push(currentFunctions[index]);
+        //nao permite duplicidade
+        currentFunctions.map((func) => {
+          if (func.str.includes(funcOne.replace(/( )+/g, '') + ')')) {
+            existFunc = true;
           }
-        }
-        if (arrayFunctions.length > currentFunctions.length) {
-          setCurrentFunctions(arrayFunctions);
+        });
+        if (!existFunc) {
+          strFormat += `${funcOne.replace(/( )+/g, '')}) = (${funcTwo.replace(
+            /( )+/g,
+            ''
+          )})`;
+          const arrayFunctions = [];
+          for (let index = 0; index <= currentFunctions.length; index++) {
+            if (index === currentFunctions.length) {
+              arrayFunctions.push({
+                id: currentFunctions.length + 1,
+                str: strFormat,
+              });
+            } else {
+              arrayFunctions.push(currentFunctions[index]);
+            }
+          }
+          if (arrayFunctions.length > currentFunctions.length) {
+            setCurrentFunctions(arrayFunctions);
+          }
         }
       }
     }
@@ -196,7 +212,6 @@ export default function Form() {
   //Metodo que omite a opcao de editar/alterar apos o clique do botao
   const handleEditButtonClick = () => {
     setToOmit(false);
-    setAllowedStart(false);
   };
 
   /*Método para abrir modal de informacoes
@@ -279,6 +294,11 @@ export default function Form() {
     }
   };
 
+  //Metodo que, atraves do reset do processamento da fita, libera a troca de entrada
+  const freeInit = () => {
+    setAllowedStart(false);
+  };
+
   return (
     <Fragment>
       <div className={css.flexRowElements}>
@@ -286,10 +306,7 @@ export default function Form() {
           {!toOmit && (
             <div>
               <div className={css.flexRow}>
-                <h2
-                  title="Defina o estado inicial (q0) e clique no botão 'OK'. Clique aqui para saber mais!"
-                  //onClick={handleOpen}
-                >
+                <h2 title="Defina o estado inicial (q0) e clique no botão 'OK'. Clique aqui para saber mais!">
                   1
                 </h2>
                 <span style={styles.initialStateSpan}>
@@ -424,7 +441,7 @@ export default function Form() {
       </div>
       <div className={css.flexRowElements}>
         <Table func={currentFunctions} title="Funções de Transição" />
-        <Table func={currentStates} title="Estados Inicial e de Aceitação" />
+        <Table func={currentStates} title="Informações de Processamento" />
       </div>
       {input[0] !== '-' && (
         <Step
@@ -433,6 +450,7 @@ export default function Form() {
           initial={initialState}
           final={finalStates}
           updateInput={updateInput}
+          freeInit={freeInit}
         />
       )}
     </Fragment>

@@ -4,7 +4,14 @@ import css from './step.module.css';
 const INITIAL_SIMBOL = '▷';
 const POINTER_SIMBOL = '⇧';
 
-export default function Step({ func, input, initial, final, updateInput }) {
+export default function Step({
+  func,
+  input,
+  initial,
+  final,
+  updateInput,
+  freeInit,
+}) {
   console.log('input' + input);
   //constante que define localizacao do apontador
   const [pointerControll, setPointerControll] = useState([
@@ -24,9 +31,12 @@ export default function Step({ func, input, initial, final, updateInput }) {
   //constante que armazena as funcoes de transicao como objetos
   const [funcObject, setFuncObject] = useState([]);
   //constante que armazena o estado atual de processamento
-  const [currentState, setCurrentState] = useState();
+  const [currentState, setCurrentState] = useState(initial);
   //constante que armazena a parte do input que esta sendo lida
-  const [currentInput, setCurrentInput] = useState();
+  const [currentInput, setCurrentInput] = useState({
+    index: -1,
+    str: INITIAL_SIMBOL,
+  });
   //constante que armazena a funcao de transicao a ser exibida
   const [currentFunc, setCurrentFunc] = useState('');
   //constante que armazena a funcao de transicao a ser processada
@@ -41,17 +51,19 @@ export default function Step({ func, input, initial, final, updateInput }) {
     if (currentFuncProcessing) {
       let auxArray = pointerControll;
       const indexTrue = pointerControll.indexOf(true);
-      updateInput(currentFuncProcessing.destination.writer, indexTrue - 1);
+      if (indexTrue !== 0) {
+        updateInput(currentFuncProcessing.destination.writer, indexTrue - 1);
+      }
       switch (currentFuncProcessing.destination.moviment) {
         case '>':
           auxArray[indexTrue] = false;
           auxArray[indexTrue + 1] = true;
           setPointerControll(auxArray);
           setCurrentState(currentFuncProcessing.destination.state);
-          setCurrentInput({ index: indexTrue + 1, str: input[indexTrue + 1] });
+          setCurrentInput({ index: indexTrue, str: input[indexTrue] });
           break;
         case '<':
-          if (indexTrue > 1) {
+          if (indexTrue > 0) {
             auxArray[indexTrue] = false;
             auxArray[indexTrue - 1] = true;
             setPointerControll(auxArray);
@@ -61,7 +73,7 @@ export default function Step({ func, input, initial, final, updateInput }) {
               str: input[indexTrue - 1],
             });
           } else {
-            setCurrentFunc('Palavra Rejeitada!');
+            setCurrentFunc('Movimento inválido. Palavra Rejeitada!');
           }
           break;
         default:
@@ -148,50 +160,41 @@ export default function Step({ func, input, initial, final, updateInput }) {
         auxArray.push(arrayObject[index]);
       }
       setFuncObject(auxArray);
-      setPointerControll([
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-      ]);
-      setCurrentState(initial);
-      setCurrentInput({ index: 0, str: input[0] });
+      findTransitionFunction();
     } else {
-      if (currentFunc !== 'Palavra rejeitada!') {
-        let functionSelected = funcObject.filter((funcao) => {
-          return (
-            currentState === funcao.origin.state &&
-            currentInput.str === funcao.origin.input
-          );
-        });
-        if (functionSelected.length > 0 && !final.includes(currentState)) {
-          let objCurrentFunc = func[functionSelected[0].id - 1];
-          setCurrentFunc(objCurrentFunc.str);
+      findTransitionFunction();
+    }
+  };
 
-          let objCurrentFuncProcessing = funcObject[functionSelected[0].id - 2];
-          setCurrentFuncProcessing({
-            destination: {
-              moviment: objCurrentFuncProcessing.destination.moviment,
-              state: objCurrentFuncProcessing.destination.state,
-              writer: objCurrentFuncProcessing.destination.writer,
-            },
-            id: objCurrentFuncProcessing.id,
-            origin: {
-              input: objCurrentFuncProcessing.origin.input,
-              state: objCurrentFuncProcessing.origin.state,
-            },
-          });
-        } else if (final.includes(currentState)) {
-          setCurrentFunc('Palavra Aceita!');
-        } else {
-          setCurrentFunc('Palavra rejeitada!');
-        }
+  const findTransitionFunction = () => {
+    if (currentFunc !== 'Palavra rejeitada!') {
+      let functionSelected = funcObject.filter((funcao) => {
+        return (
+          currentState === funcao.origin.state &&
+          currentInput.str === funcao.origin.input
+        );
+      });
+      if (functionSelected.length > 0 && !final.includes(currentState)) {
+        let objCurrentFunc = func[functionSelected[0].id - 1];
+        setCurrentFunc(objCurrentFunc.str);
+
+        let objCurrentFuncProcessing = funcObject[functionSelected[0].id - 2];
+        setCurrentFuncProcessing({
+          destination: {
+            moviment: objCurrentFuncProcessing.destination.moviment,
+            state: objCurrentFuncProcessing.destination.state,
+            writer: objCurrentFuncProcessing.destination.writer,
+          },
+          id: objCurrentFuncProcessing.id,
+          origin: {
+            input: objCurrentFuncProcessing.origin.input,
+            state: objCurrentFuncProcessing.origin.state,
+          },
+        });
+      } else if (final.includes(currentState)) {
+        setCurrentFunc('Palavra Aceita!');
+      } else {
+        setCurrentFunc('Palavra rejeitada!');
       }
     }
   };
@@ -208,8 +211,12 @@ export default function Step({ func, input, initial, final, updateInput }) {
 
   const handleAllPreviousStepButtonClick = () => {
     updateInput(copyInput, -1);
-    setCurrentState();
-    setCurrentInput();
+    setCurrentState(initial);
+    setCurrentInput({
+      index: -1,
+      str: INITIAL_SIMBOL,
+    });
+    setFuncObject([]);
     setCurrentFunc('');
     setCurrentFuncProcessing();
     setPointerControll([
@@ -224,6 +231,7 @@ export default function Step({ func, input, initial, final, updateInput }) {
       false,
       false,
     ]);
+    freeInit();
   };
 
   return (
@@ -262,13 +270,7 @@ export default function Step({ func, input, initial, final, updateInput }) {
           <tbody>
             <tr style={styles.trPointer}>
               {pointerControll.map((pointer) => {
-                if (pointer && pointer === pointerControll[0]) {
-                  return (
-                    <td style={styles.tdPointerIcon}>
-                      <span style={styles.iconPointer}>{POINTER_SIMBOL}</span>
-                    </td>
-                  );
-                } else if (pointer && pointer !== pointerControll[0]) {
+                if (pointer) {
                   return (
                     <td style={styles.tdPointerIcon}>
                       <span style={styles.iconPointer}>{POINTER_SIMBOL}</span>
