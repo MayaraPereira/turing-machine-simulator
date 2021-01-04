@@ -428,7 +428,9 @@ export default function Form() {
 
   //Metodo que, atraves do reset do processamento da fita, libera a troca de entrada
   const freeInit = () => {
-    setAllowedStart(false);
+    if (!toOmit) {
+      setAllowedStart(false);
+    }
   };
 
   return (
@@ -536,23 +538,9 @@ export default function Form() {
                 </a>
               </div>
               {toOmitEditFunctions && (
-                <div
-                  style={{
-                    backgroundColor: '#D7DED7',
-                    borderRadius: '5px',
-                    padding: '1rem',
-                  }}
-                >
+                <div style={styles.divEditFunctions}>
                   <div
-                    style={{
-                      marginBottom: '0.5rem',
-                      float: 'right',
-                      border: '1px solid rgb(158, 158, 158)',
-                      borderRadius: '2px',
-                      paddingLeft: '4px',
-                      paddingRight: '4px',
-                      cursor: 'pointer',
-                    }}
+                    style={styles.btnCloseEditFunctions}
                     onClick={handleCloseEditFunctionsButtonClick}
                   >
                     <span>X</span>
@@ -563,13 +551,7 @@ export default function Form() {
                   <div style={{ padding: '1rem' }}>
                     <span style={{ marginRight: '0.3rem' }}>{`${PI}(`}</span>
                     <input
-                      style={{
-                        border: '1px solid rgb(158, 158, 158)',
-                        padding: '1%',
-                        width: '40px',
-                        height: '30%',
-                        textAlign: 'center',
-                      }}
+                      style={styles.firstInputEditFunctions}
                       title="função de transição"
                       placeholder="p, au"
                       onChange={handleFirstInputEditFunctionChange}
@@ -580,13 +562,7 @@ export default function Form() {
                       ) = (
                     </span>
                     <input
-                      style={{
-                        border: '1px solid rgb(158, 158, 158)',
-                        padding: '1%',
-                        width: '70px',
-                        height: '30%',
-                        textAlign: 'center',
-                      }}
+                      style={styles.secondInputEditFunctions}
                       title="função de transição"
                       placeholder="q, av, m"
                       onChange={handleSecondInputEditFunctionChange}
@@ -654,13 +630,7 @@ export default function Form() {
             </a>
           </div>
           {toOmit && (
-            <div
-              style={{
-                textAlign: 'center',
-                backgroundColor: '#D7DED7',
-                borderRadius: '5px',
-              }}
-            >
+            <div style={styles.divEditAll}>
               <a
                 className="waves-effect waves-light btn-small"
                 href="#!"
@@ -677,7 +647,7 @@ export default function Form() {
         <Table func={currentFunctions} title="Funções de Transição" />
         <Table func={currentStates} title="Informações de Processamento" />
       </div>
-      {input[0] !== '-' && (
+      {input[0] !== '-' && toOmit && (
         <Step
           func={currentFunctions}
           input={input}
@@ -776,5 +746,38 @@ const styles = {
     minWidth: '74px',
     marginBottom: '1rem',
     marginTop: '1rem',
+  },
+  divEditAll: {
+    textAlign: 'center',
+    backgroundColor: '#D7DED7',
+    borderRadius: '5px',
+  },
+  divEditFunctions: {
+    backgroundColor: '#D7DED7',
+    borderRadius: '5px',
+    padding: '1rem',
+  },
+  btnCloseEditFunctions: {
+    marginBottom: '0.5rem',
+    float: 'right',
+    border: '1px solid rgb(158, 158, 158)',
+    borderRadius: '2px',
+    paddingLeft: '4px',
+    paddingRight: '4px',
+    cursor: 'pointer',
+  },
+  firstInputEditFunctions: {
+    border: '1px solid rgb(158, 158, 158)',
+    padding: '1%',
+    width: '40px',
+    height: '30%',
+    textAlign: 'center',
+  },
+  secondInputEditFunctions: {
+    border: '1px solid rgb(158, 158, 158)',
+    padding: '1%',
+    width: '70px',
+    height: '30%',
+    textAlign: 'center',
   },
 };

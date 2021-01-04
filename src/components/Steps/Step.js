@@ -43,12 +43,16 @@ export default function Step({
   const [currentFuncProcessing, setCurrentFuncProcessing] = useState();
   //constante que armazena o valor inicial da entrada processada
   const [copyInput, setCopyInput] = useState();
+  //constante que controla o sentido do processamento
+  const [direction, setDirection] = useState();
+  //constante que controla o inicio do processamento
+  const [firstStep, setFirstStep] = useState(true);
 
   /*A partir da atualização da currentFuncProcessing (funcao atual a ser processada)
    * o fluxo de processamento ocorre
    */
   useEffect(() => {
-    if (currentFuncProcessing) {
+    if (currentFuncProcessing && direction === 'right') {
       let auxArray = pointerControll;
       const indexTrue = pointerControll.indexOf(true);
       if (indexTrue !== 0) {
@@ -68,10 +72,17 @@ export default function Step({
             auxArray[indexTrue - 1] = true;
             setPointerControll(auxArray);
             setCurrentState(currentFuncProcessing.destination.state);
-            setCurrentInput({
-              index: indexTrue - 1,
-              str: input[indexTrue - 1],
-            });
+            if (indexTrue === 1) {
+              setCurrentInput({
+                index: -1,
+                str: INITIAL_SIMBOL,
+              });
+            } else {
+              setCurrentInput({
+                index: indexTrue - 2,
+                str: input[indexTrue - 2],
+              });
+            }
           } else {
             setCurrentFunc('Movimento inválido. Palavra Rejeitada!');
           }
@@ -80,6 +91,7 @@ export default function Step({
           setCurrentFunc('Movimento Inválido!');
           break;
       }
+    } else if (currentFuncProcessing && direction === 'left') {
     }
   }, [currentFuncProcessing, pointerControll]);
 
@@ -88,9 +100,11 @@ export default function Step({
    * Senao, atualiza dados de processamento
    */
   const handleNextStepButtonClick = () => {
+    setDirection('right');
     //Primeiro if transforma todas as funcoes de transicao em objetos
     let arrayObject;
-    if (pointerControll.indexOf(true) === 0) {
+    if (pointerControll.indexOf(true) === 0 && firstStep) {
+      setFirstStep(false);
       setCopyInput(input);
       arrayObject = func.map((funcaoComplete) => {
         let funcao = funcaoComplete.str;
@@ -204,34 +218,39 @@ export default function Step({
    * Senao, atualiza dados de processamento de acordo com as funções processadas
    */
   const handlePreviousStepButtonClick = () => {
-    if (pointerControll.indexOf(true) !== 0) {
-      console.log('entrou aqui');
+    setDirection('left');
+    if (currentFunc !== '') {
+    } else {
+      setCurrentFunc('Nenhum passo anterior para retroceder.');
     }
   };
 
   const handleAllPreviousStepButtonClick = () => {
-    updateInput(copyInput, -1);
-    setCurrentState(initial);
-    setCurrentInput({
-      index: -1,
-      str: INITIAL_SIMBOL,
-    });
-    setFuncObject([]);
-    setCurrentFunc('');
-    setCurrentFuncProcessing();
-    setPointerControll([
-      true,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-    ]);
-    freeInit();
+    if (!firstStep) {
+      updateInput(copyInput, -1);
+      setCurrentState(initial);
+      setCurrentInput({
+        index: -1,
+        str: INITIAL_SIMBOL,
+      });
+      setFuncObject([]);
+      setCurrentFunc('');
+      setCurrentFuncProcessing();
+      setPointerControll([
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+      ]);
+      freeInit();
+      setFirstStep(true);
+    }
   };
 
   return (
