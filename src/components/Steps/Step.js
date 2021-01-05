@@ -47,6 +47,8 @@ export default function Step({
   const [direction, setDirection] = useState();
   //constante que controla o inicio do processamento
   const [firstStep, setFirstStep] = useState(true);
+  //constante que armazena o historico de funcoes processadas
+  const [historicFuncProcessing, setHistoricFuncProcessing] = useState([]);
 
   /*A partir da atualização da currentFuncProcessing (funcao atual a ser processada)
    * o fluxo de processamento ocorre
@@ -91,7 +93,6 @@ export default function Step({
           setCurrentFunc('Movimento Inválido!');
           break;
       }
-    } else if (currentFuncProcessing && direction === 'left') {
     }
   }, [currentFuncProcessing, pointerControll]);
 
@@ -205,6 +206,9 @@ export default function Step({
             state: objCurrentFuncProcessing.origin.state,
           },
         });
+        let arrayTemp = historicFuncProcessing;
+        arrayTemp.push(objCurrentFuncProcessing);
+        setHistoricFuncProcessing(arrayTemp);
       } else if (final.includes(currentState)) {
         setCurrentFunc('Palavra Aceita!');
       } else {
@@ -219,7 +223,76 @@ export default function Step({
    */
   const handlePreviousStepButtonClick = () => {
     setDirection('left');
-    if (currentFunc !== '') {
+    if (
+      currentFunc !== '' &&
+      currentFunc !== 'Nenhum passo anterior para retroceder.'
+    ) {
+      let auxCounter = -1;
+      let indexFunc = -1;
+      let functionSelected = historicFuncProcessing.filter((funcao) => {
+        auxCounter++;
+        if (
+          currentFuncProcessing.origin.state === funcao.origin.state &&
+          currentFuncProcessing.origin.input === funcao.origin.input
+        ) {
+          indexFunc = auxCounter;
+          return funcao;
+        }
+      });
+
+      let auxArray = pointerControll;
+      const indexTrue = pointerControll.indexOf(true);
+      switch (currentFuncProcessing.destination.moviment) {
+        case '>':
+          if (indexTrue > 1) {
+            updateInput(currentFuncProcessing.origin.input, indexTrue - 2);
+          }
+          if (indexTrue > 0) {
+            auxArray[indexTrue] = false;
+            auxArray[indexTrue - 1] = true;
+            setPointerControll(auxArray);
+            if (indexTrue === 1) {
+              setCurrentInput({
+                index: -1,
+                str: INITIAL_SIMBOL,
+              });
+            } else {
+              setCurrentInput({
+                index: indexTrue - 2,
+                str: input[indexTrue - 2],
+              });
+            }
+          } else {
+            setCurrentFunc('Movimento inválido. Palavra Rejeitada!');
+          }
+          break;
+        case '<':
+          if (indexTrue < input.length) {
+            updateInput(currentFuncProcessing.origin.input, indexTrue);
+          }
+          auxArray[indexTrue] = false;
+          auxArray[indexTrue + 1] = true;
+          setPointerControll(auxArray);
+          setCurrentInput({ index: indexTrue, str: input[indexTrue] });
+          break;
+        default:
+          setCurrentFunc('Movimento Inválido!');
+          break;
+      }
+
+      if (functionSelected.length > 0 && indexFunc !== -1) {
+        setCurrentState(currentFuncProcessing.origin.state);
+        if (currentFuncProcessing.origin.input === INITIAL_SIMBOL) {
+          setCurrentFunc('');
+          setCurrentFuncProcessing();
+          setHistoricFuncProcessing([]);
+        } else {
+          let objCurrentFunc =
+            func[functionSelected[functionSelected.length - 1].id - 1];
+          setCurrentFunc(objCurrentFunc.str);
+          setCurrentFuncProcessing(historicFuncProcessing[indexFunc - 1]);
+        }
+      }
     } else {
       setCurrentFunc('Nenhum passo anterior para retroceder.');
     }
@@ -250,6 +323,7 @@ export default function Step({
       ]);
       freeInit();
       setFirstStep(true);
+      setHistoricFuncProcessing([]);
     }
   };
 
