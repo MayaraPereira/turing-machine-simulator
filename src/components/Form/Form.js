@@ -236,6 +236,7 @@ export default function Form() {
     if (editFuncOne && editFuncTwo) {
       let strFormat = PI + '(';
       if (editFuncOne.indexOf(',') !== -1 && editFuncTwo.indexOf(',') !== -1) {
+        // eslint-disable-next-line
         let funcEdit = currentFunctions.find((func) => {
           if (func.str.includes(editFuncOne.replace(/( )+/g, '') + ')')) {
             return func;
@@ -272,6 +273,7 @@ export default function Form() {
   const handleDeleteFunctionButtonClick = () => {
     if (editFuncOne && editFuncTwo) {
       if (editFuncOne.indexOf(',') !== -1 && editFuncTwo.indexOf(',') !== -1) {
+        // eslint-disable-next-line
         let funcDelete = currentFunctions.find((func) => {
           if (
             func.str.includes(editFuncOne.replace(/( )+/g, '') + ')') &&

@@ -28,6 +28,8 @@ export default function Step({
   ]);
   //variavel que armazena um contador auxiliar para renderizacao das células da fita
   let counterPointer = 0;
+  //contador que controla quantidade de vezes de execucao automatica para evitar loop infinito
+  const [auxCounter, setAuxCounter] = useState(0);
   //constante que armazena as funcoes de transicao como objetos
   const [funcObject, setFuncObject] = useState([]);
   //constante que armazena o estado atual de processamento
@@ -49,6 +51,8 @@ export default function Step({
   const [firstStep, setFirstStep] = useState(true);
   //constante que armazena o historico de funcoes processadas
   const [historicFuncProcessing, setHistoricFuncProcessing] = useState([]);
+  //constante que controla o processamento automatico
+  const [allSteps, setAllSteps] = useState(false);
 
   /*A partir da atualização da currentFuncProcessing (funcao atual a ser processada)
    * o fluxo de processamento ocorre
@@ -86,15 +90,31 @@ export default function Step({
               });
             }
           } else {
+            setCurrentInput({
+              index: -1,
+              str: INITIAL_SIMBOL,
+            });
             setCurrentFunc('Movimento inválido. Palavra Rejeitada!');
           }
           break;
         default:
+          setCurrentInput({
+            index: -1,
+            str: INITIAL_SIMBOL,
+          });
           setCurrentFunc('Movimento Inválido!');
           break;
       }
     }
+    // eslint-disable-next-line
   }, [currentFuncProcessing, pointerControll]);
+
+  useEffect(() => {
+    if (allSteps) {
+      handleAllNextStepButtonClick();
+    }
+    // eslint-disable-next-line
+  }, [currentInput]);
 
   /*Método disparado ao clicar no botão de próximo passo
    * Se for o primeiro passo, ele transforma todas as funcoes de transicao em objetos
@@ -181,6 +201,8 @@ export default function Step({
     }
   };
 
+  /*Método que seta a função a ser processada e a exibição de feedback
+   */
   const findTransitionFunction = () => {
     if (currentFunc !== 'Palavra rejeitada!') {
       let functionSelected = funcObject.filter((funcao) => {
@@ -217,18 +239,42 @@ export default function Step({
     }
   };
 
+  /** Método disparado ao clicar no botão de avançar para o fim do processamento
+   * Exibe feedback final ou aviso de loop
+   */
+  const handleAllNextStepButtonClick = () => {
+    setAllSteps(true);
+    if (
+      currentFunc !== 'Palavra Aceita!' &&
+      currentFunc !== 'Palavra rejeitada!' &&
+      currentFunc !== 'Movimento inválido. Palavra Rejeitada!' &&
+      currentFunc !== 'Movimento Inválido!' &&
+      auxCounter < 100
+    ) {
+      setAuxCounter(auxCounter + 1);
+      handleNextStepButtonClick();
+    } else if (auxCounter >= 100) {
+      setAllSteps(false);
+      setCurrentFunc('Processamento interrompido devido a loop.');
+    } else {
+      setAllSteps(false);
+    }
+  };
+
   /*Método disparado ao clicar no botão de passo anterior
    * Se o apontador estiver no símbolo inicial da fita, não ocorre nenhuma ação
-   * Senao, atualiza dados de processamento de acordo com as funções processadas
+   * Senao, atualiza dados de processamento de acordo com as funções já processadas
    */
   const handlePreviousStepButtonClick = () => {
     setDirection('left');
+    setAllSteps(false);
     if (
       currentFunc !== '' &&
       currentFunc !== 'Nenhum passo anterior para retroceder.'
     ) {
       let auxCounter = -1;
       let indexFunc = -1;
+      // eslint-disable-next-line
       let functionSelected = historicFuncProcessing.filter((funcao) => {
         auxCounter++;
         if (
@@ -282,7 +328,10 @@ export default function Step({
 
       if (functionSelected.length > 0 && indexFunc !== -1) {
         setCurrentState(currentFuncProcessing.origin.state);
-        if (currentFuncProcessing.origin.input === INITIAL_SIMBOL) {
+        if (
+          currentFuncProcessing.origin.input === INITIAL_SIMBOL &&
+          indexFunc === 0
+        ) {
           setCurrentFunc('');
           setCurrentFuncProcessing();
           setHistoricFuncProcessing([]);
@@ -298,7 +347,13 @@ export default function Step({
     }
   };
 
+  /*Método disparado ao clicar no botão de resetar processamento
+   * Se o apontador estiver no símbolo inicial da fita, não ocorre nenhuma ação
+   * Senao, reseta os dados de processamento
+   */
   const handleAllPreviousStepButtonClick = () => {
+    setAllSteps(false);
+    setAuxCounter(0);
     if (!firstStep) {
       updateInput(copyInput, -1);
       setCurrentState(initial);
@@ -324,6 +379,7 @@ export default function Step({
       freeInit();
       setFirstStep(true);
       setHistoricFuncProcessing([]);
+      counterPointer = 0;
     }
   };
 
@@ -391,7 +447,7 @@ export default function Step({
         <a
           className="waves-effect waves-light btn"
           href="#!"
-          onClick={handleNextStepButtonClick}
+          onClick={handleAllNextStepButtonClick}
           style={{ fontSize: 'x-large' }}
           title="Avança até o último passo do processamento da entrada, exibindo o feedback final"
         >
