@@ -56,7 +56,7 @@ export default function Form() {
   //constante que armazena estado inicial digitado pelo usuario
   const [lookInitialState, setLookInitialState] = useState();
   //constante que armazena estados finais definidos pelo usuario
-  const [finalStates, setFinalStates] = useState();
+  const [finalStates, setFinalStates] = useState([]);
   //constante que armazena estados finais digitados pelo usuario
   const [lookFinalStates, setLookFinalStates] = useState();
   //constante que controla exibicao dos passos
@@ -101,12 +101,28 @@ export default function Form() {
 
   //Metodo que atualiza os estados finais
   const handleFinalStatesButtonClick = () => {
-    setFinalStates(lookFinalStates);
     if (lookFinalStates) {
       let strFormat = `${STR_FINAL_STATES_DEFAULT}${lookFinalStates.replace(
         /( )+/g,
         ''
       )}}`;
+      let strFormatStates = `${lookFinalStates.replace(/( )+/g, '')}`;
+      const arrayFinalStates = [];
+      let strBreak = '';
+      for (let index = 0; index < strFormatStates.length; index++) {
+        if (strFormatStates[index] === ',') {
+          arrayFinalStates.push(strBreak);
+          strBreak = '';
+        } else if (index === strFormatStates.length - 1) {
+          strBreak += strFormatStates[index];
+          arrayFinalStates.push(strBreak);
+          strBreak = '';
+        } else {
+          strBreak += strFormatStates[index];
+        }
+      }
+      setFinalStates(arrayFinalStates);
+
       currentStates.find((state) => {
         return state.id === 2;
       }).str = strFormat;
@@ -187,10 +203,10 @@ export default function Form() {
   //Metodo que processa qualquer valor digitado no campo 'entrada'
   const handleThirdInputChange = (event) => {
     const { value } = event.target;
-    if (value.replace(/( )+/g, '') && value.replace(/( )+/g, '').length < 9) {
+    if (value.replace(/( )+/g, '') && value.replace(/( )+/g, '').length < 8) {
       let size = value.replace(/( )+/g, '').length;
       let white = value.replace(/( )+/g, '');
-      for (let index = size - 1; index < 10; index++) {
+      for (let index = size - 1; index < 8; index++) {
         white += '-';
       }
       setLookInput(white);
@@ -341,7 +357,7 @@ export default function Form() {
     setLookInput();
     setInitialState();
     setLookInitialState();
-    setFinalStates();
+    setFinalStates([]);
     setLookFinalStates();
     setToOmit(false);
     setToOmitEditFunctions(false);

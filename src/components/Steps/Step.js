@@ -12,7 +12,6 @@ export default function Step({
   updateInput,
   freeInit,
 }) {
-  console.log('input' + input);
   //constante que define localizacao do apontador
   const [pointerControll, setPointerControll] = useState([
     true,
@@ -53,6 +52,8 @@ export default function Step({
   const [historicFuncProcessing, setHistoricFuncProcessing] = useState([]);
   //constante que controla o processamento automatico
   const [allSteps, setAllSteps] = useState(false);
+  //constante que controla quantos caracteres do input foram omitidos
+  const [counterCaracter, setCounterCaracter] = useState(0);
 
   /*A partir da atualização da currentFuncProcessing (funcao atual a ser processada)
    * o fluxo de processamento ocorre
@@ -62,39 +63,73 @@ export default function Step({
       let auxArray = pointerControll;
       const indexTrue = pointerControll.indexOf(true);
       if (indexTrue !== 0) {
-        updateInput(currentFuncProcessing.destination.writer, indexTrue - 1);
+        if (indexTrue === 8 && counterCaracter !== 0) {
+          updateInput(
+            currentFuncProcessing.destination.writer,
+            indexTrue - 1 + counterCaracter
+          );
+        } else {
+          updateInput(currentFuncProcessing.destination.writer, indexTrue - 1);
+        }
       }
       switch (currentFuncProcessing.destination.moviment) {
         case '>':
-          auxArray[indexTrue] = false;
-          auxArray[indexTrue + 1] = true;
-          setPointerControll(auxArray);
-          setCurrentState(currentFuncProcessing.destination.state);
-          setCurrentInput({ index: indexTrue, str: input[indexTrue] });
-          break;
-        case '<':
-          if (indexTrue > 0) {
+          if (indexTrue === 8 && input.length >= 8) {
+            //Nao muda pointerControll pois já está no limite
+            setCounterCaracter(counterCaracter + 1);
+            setCurrentState(currentFuncProcessing.destination.state);
+            if (counterCaracter === 0) {
+              setCurrentInput({
+                index: indexTrue,
+                str: input[indexTrue],
+              });
+            } else {
+              setCurrentInput({
+                index: indexTrue + counterCaracter,
+                str: input[indexTrue + counterCaracter],
+              });
+            }
+          } else {
             auxArray[indexTrue] = false;
-            auxArray[indexTrue - 1] = true;
+            auxArray[indexTrue + 1] = true;
             setPointerControll(auxArray);
             setCurrentState(currentFuncProcessing.destination.state);
-            if (indexTrue === 1) {
+            setCurrentInput({ index: indexTrue, str: input[indexTrue] });
+          }
+          break;
+        case '<':
+          if (indexTrue === 8 && input.length >= 8 && counterCaracter !== 0) {
+            setCounterCaracter(counterCaracter - 1);
+            setCurrentState(currentFuncProcessing.destination.state);
+            setCurrentInput({
+              index: indexTrue - 1,
+              str: input[indexTrue - 1],
+            });
+            setCounterCaracter(counterCaracter - 1);
+          } else {
+            if (indexTrue > 0) {
+              auxArray[indexTrue] = false;
+              auxArray[indexTrue - 1] = true;
+              setPointerControll(auxArray);
+              setCurrentState(currentFuncProcessing.destination.state);
+              if (indexTrue === 1) {
+                setCurrentInput({
+                  index: -1,
+                  str: INITIAL_SIMBOL,
+                });
+              } else {
+                setCurrentInput({
+                  index: indexTrue - 2,
+                  str: input[indexTrue - 2],
+                });
+              }
+            } else {
               setCurrentInput({
                 index: -1,
                 str: INITIAL_SIMBOL,
               });
-            } else {
-              setCurrentInput({
-                index: indexTrue - 2,
-                str: input[indexTrue - 2],
-              });
+              setCurrentFunc('Movimento inválido. Palavra Rejeitada!');
             }
-          } else {
-            setCurrentInput({
-              index: -1,
-              str: INITIAL_SIMBOL,
-            });
-            setCurrentFunc('Movimento inválido. Palavra Rejeitada!');
           }
           break;
         default:
@@ -231,7 +266,11 @@ export default function Step({
         let arrayTemp = historicFuncProcessing;
         arrayTemp.push(objCurrentFuncProcessing);
         setHistoricFuncProcessing(arrayTemp);
-      } else if (final.includes(currentState)) {
+      } else if (
+        final.find((state) => {
+          return state === currentState;
+        }) !== undefined
+      ) {
         setCurrentFunc('Palavra Aceita!');
       } else {
         setCurrentFunc('Palavra rejeitada!');
@@ -290,36 +329,69 @@ export default function Step({
       const indexTrue = pointerControll.indexOf(true);
       switch (currentFuncProcessing.destination.moviment) {
         case '>':
-          if (indexTrue > 1) {
+          if (indexTrue > 1 && indexTrue <= 8 && counterCaracter === 0) {
             updateInput(currentFuncProcessing.origin.input, indexTrue - 2);
           }
-          if (indexTrue > 0) {
-            auxArray[indexTrue] = false;
-            auxArray[indexTrue - 1] = true;
-            setPointerControll(auxArray);
-            if (indexTrue === 1) {
-              setCurrentInput({
-                index: -1,
-                str: INITIAL_SIMBOL,
-              });
-            } else {
-              setCurrentInput({
-                index: indexTrue - 2,
-                str: input[indexTrue - 2],
-              });
-            }
+          if (indexTrue === 8 && input.length >= 8 && counterCaracter !== 0) {
+            updateInput(
+              currentFuncProcessing.origin.input,
+              indexTrue + (counterCaracter - 2)
+            );
+            setCounterCaracter(counterCaracter - 1);
+            setCurrentInput({
+              index: indexTrue - counterCaracter,
+              str: input[indexTrue - counterCaracter],
+            });
+            setCounterCaracter(counterCaracter - 1);
           } else {
-            setCurrentFunc('Movimento inválido. Palavra Rejeitada!');
+            if (indexTrue > 0) {
+              auxArray[indexTrue] = false;
+              auxArray[indexTrue - 1] = true;
+              setPointerControll(auxArray);
+              if (indexTrue === 1) {
+                setCurrentInput({
+                  index: -1,
+                  str: INITIAL_SIMBOL,
+                });
+              } else {
+                setCurrentInput({
+                  index: indexTrue - 2,
+                  str: input[indexTrue - 2],
+                });
+              }
+            } else {
+              setCurrentFunc('Movimento inválido. Palavra Rejeitada!');
+            }
           }
           break;
         case '<':
-          if (indexTrue < input.length) {
+          if (indexTrue < input.length && indexTrue < 8) {
             updateInput(currentFuncProcessing.origin.input, indexTrue);
           }
-          auxArray[indexTrue] = false;
-          auxArray[indexTrue + 1] = true;
-          setPointerControll(auxArray);
-          setCurrentInput({ index: indexTrue, str: input[indexTrue] });
+          if (indexTrue === 8 && input.length >= 8) {
+            updateInput(
+              currentFuncProcessing.origin.input,
+              indexTrue + counterCaracter
+            );
+            //Nao muda pointerControll pois já está no limite
+            setCounterCaracter(counterCaracter + 1);
+            if (counterCaracter === 0) {
+              setCurrentInput({
+                index: indexTrue,
+                str: input[indexTrue],
+              });
+            } else {
+              setCurrentInput({
+                index: indexTrue + counterCaracter,
+                str: input[indexTrue + counterCaracter],
+              });
+            }
+          } else {
+            auxArray[indexTrue] = false;
+            auxArray[indexTrue + 1] = true;
+            setPointerControll(auxArray);
+            setCurrentInput({ index: indexTrue, str: input[indexTrue] });
+          }
           break;
         default:
           setCurrentFunc('Movimento Inválido!');
@@ -380,6 +452,7 @@ export default function Step({
       setFirstStep(true);
       setHistoricFuncProcessing([]);
       counterPointer = 0;
+      setCounterCaracter(0);
     }
   };
 
@@ -401,13 +474,21 @@ export default function Step({
                   pointer === true &&
                   index < pointerControll.length - 1
                 ) {
-                  return <td style={styles.tdSelected}>{input[index - 1]}</td>;
+                  return (
+                    <td style={styles.tdSelected}>
+                      {input[index - 1 + counterCaracter]}
+                    </td>
+                  );
                 } else if (
                   index !== 0 &&
                   pointer === false &&
                   index < pointerControll.length - 1
                 ) {
-                  return <td style={styles.td}>{input[index - 1]}</td>;
+                  return (
+                    <td style={styles.td}>
+                      {input[index - 1 + counterCaracter]}
+                    </td>
+                  );
                 } else {
                   return <td style={styles.td}>...</td>;
                 }
