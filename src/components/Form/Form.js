@@ -1,10 +1,10 @@
 import React, { Fragment, useState } from 'react';
-/*import { makeStyles } from '@material-ui/core/styles';
-import Modal from '@material-ui/core/Modal';*/
+import { CustomDialog } from 'react-st-modal';
 
 import css from './form.module.css';
 import Table from '../Table/Table';
 import Step from '../Steps/Step';
+import CustomDialogContent from '../Modal/CustomDialogContent';
 
 const PI = 'Π';
 const STR_PADRAO = PI + '(p, au) = (q, av, m)';
@@ -56,7 +56,7 @@ export default function Form() {
   //constante que armazena estado inicial digitado pelo usuario
   const [lookInitialState, setLookInitialState] = useState();
   //constante que armazena estados finais definidos pelo usuario
-  const [finalStates, setFinalStates] = useState();
+  const [finalStates, setFinalStates] = useState([]);
   //constante que armazena estados finais digitados pelo usuario
   const [lookFinalStates, setLookFinalStates] = useState();
   //constante que controla exibicao dos passos
@@ -65,17 +65,6 @@ export default function Form() {
   const [toOmitEditFunctions, setToOmitEditFunctions] = useState(false);
   //constante que controla parcialmente o inicio do processamento
   const [allowedStart, setAllowedStart] = useState(true);
-
-  /*Modal
-  //Controla abertura e fechamento do modal
-  const [open, setOpen] = useState(false);
-  //Define o titulo do modal
-  const [modalTitle, setModalTitle] = useState('');
-  //Define descricao do modal
-  const [modalDescription, setModalDescription] = useState('');
-  //Define estilo do modal
-  const [modalStyle] = useState(getModalStyle);
-  const classes = useStyles();*/
 
   //Metodo que atualiza o estado inicial
   const handleInitialStateButtonClick = () => {
@@ -101,12 +90,28 @@ export default function Form() {
 
   //Metodo que atualiza os estados finais
   const handleFinalStatesButtonClick = () => {
-    setFinalStates(lookFinalStates);
     if (lookFinalStates) {
       let strFormat = `${STR_FINAL_STATES_DEFAULT}${lookFinalStates.replace(
         /( )+/g,
         ''
       )}}`;
+      let strFormatStates = `${lookFinalStates.replace(/( )+/g, '')}`;
+      const arrayFinalStates = [];
+      let strBreak = '';
+      for (let index = 0; index < strFormatStates.length; index++) {
+        if (strFormatStates[index] === ',') {
+          arrayFinalStates.push(strBreak);
+          strBreak = '';
+        } else if (index === strFormatStates.length - 1) {
+          strBreak += strFormatStates[index];
+          arrayFinalStates.push(strBreak);
+          strBreak = '';
+        } else {
+          strBreak += strFormatStates[index];
+        }
+      }
+      setFinalStates(arrayFinalStates);
+
       currentStates.find((state) => {
         return state.id === 2;
       }).str = strFormat;
@@ -187,10 +192,10 @@ export default function Form() {
   //Metodo que processa qualquer valor digitado no campo 'entrada'
   const handleThirdInputChange = (event) => {
     const { value } = event.target;
-    if (value.replace(/( )+/g, '') && value.replace(/( )+/g, '').length < 9) {
+    if (value.replace(/( )+/g, '') && value.replace(/( )+/g, '').length < 8) {
       let size = value.replace(/( )+/g, '').length;
       let white = value.replace(/( )+/g, '');
-      for (let index = size - 1; index < 10; index++) {
+      for (let index = size - 1; index < 8; index++) {
         white += '-';
       }
       setLookInput(white);
@@ -236,6 +241,7 @@ export default function Form() {
     if (editFuncOne && editFuncTwo) {
       let strFormat = PI + '(';
       if (editFuncOne.indexOf(',') !== -1 && editFuncTwo.indexOf(',') !== -1) {
+        // eslint-disable-next-line
         let funcEdit = currentFunctions.find((func) => {
           if (func.str.includes(editFuncOne.replace(/( )+/g, '') + ')')) {
             return func;
@@ -272,6 +278,7 @@ export default function Form() {
   const handleDeleteFunctionButtonClick = () => {
     if (editFuncOne && editFuncTwo) {
       if (editFuncOne.indexOf(',') !== -1 && editFuncTwo.indexOf(',') !== -1) {
+        // eslint-disable-next-line
         let funcDelete = currentFunctions.find((func) => {
           if (
             func.str.includes(editFuncOne.replace(/( )+/g, '') + ')') &&
@@ -339,73 +346,12 @@ export default function Form() {
     setLookInput();
     setInitialState();
     setLookInitialState();
-    setFinalStates();
+    setFinalStates([]);
     setLookFinalStates();
     setToOmit(false);
     setToOmitEditFunctions(false);
     setAllowedStart(true);
   };
-
-  /*Método para abrir modal de informacoes
-  const handleOpen = () => {
-    setOpen(true);
-    setModalTitle('Passo 1 - Estado inicial');
-    setModalDescription('Estado inicial.');
-  };
-
-  //Método para fechar modal de informacoes
-  const handleClose = () => {
-    setOpen(false);
-    setModalTitle('');
-    setModalDescription('');
-  };
-
-  //Calcula posicionamento do modal
-  function rand() {
-    return Math.round(Math.random() * 20) - 10;
-  }
-
-  //Define style do modal
-  function getModalStyle() {
-    const top = 50 + rand();
-    const left = 50 + rand();
-
-    return {
-      top: `${top}%`,
-      left: `${left}%`,
-      transform: `translate(-${top}%, -${left}%)`,
-    };
-  }
-
-  //Define style
-  const useStyles = makeStyles((theme) => ({
-    paper: {
-      position: 'absolute',
-      width: 400,
-      backgroundColor: theme.palette.background.paper,
-      border: '2px solid #000',
-      boxShadow: theme.shadows[5],
-      padding: theme.spacing(2, 4, 3),
-    },
-  }));
-
-  //define body do modal de informações
-  const body = (
-    <div style={modalStyle} className={classes.paper}>
-      <h2 id="simple-modal-title">{modalTitle}</h2>
-      <p id="simple-modal-description">{modalDescription}</p>
-    </div>
-  );
-  
-  <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-      >
-        {body}
-      </Modal>
-  */
 
   //Metodo que atualiza input a partir da escrita na fita
   const updateInput = (str, indexNew) => {
@@ -440,7 +386,18 @@ export default function Form() {
           {!toOmit && (
             <div>
               <div className={css.flexRow}>
-                <h2 title="Defina o estado inicial (q0) e clique no botão 'OK'. Clique aqui para saber mais!">
+                <h2
+                  title="Defina o estado inicial (q0) e clique no botão 'OK'. Clique aqui para saber mais!"
+                  onClick={async () => {
+                    await CustomDialog(
+                      <CustomDialogContent typeInformation="1" />,
+                      {
+                        title: 'Informações - Estado Inicial',
+                        showCloseIcon: true,
+                      }
+                    );
+                  }}
+                >
                   1
                 </h2>
                 <span style={styles.initialStateSpan}>
@@ -462,7 +419,18 @@ export default function Form() {
                 </a>
               </div>
               <div className={css.flexRow}>
-                <h2 title="Defina o conjunto de estados de aceitação e clique no botão 'OK'. Clique aqui para saber mais!">
+                <h2
+                  title="Defina o conjunto de estados de aceitação e clique no botão 'OK'. Clique aqui para saber mais!"
+                  onClick={async () => {
+                    await CustomDialog(
+                      <CustomDialogContent typeInformation="2" />,
+                      {
+                        title: 'Informações - Estados Finais',
+                        showCloseIcon: true,
+                      }
+                    );
+                  }}
+                >
                   2
                 </h2>
                 <span style={styles.finalStatesSpan}>
@@ -487,7 +455,19 @@ export default function Form() {
                 </a>
               </div>
               <div className={css.flexRow}>
-                <h2 title="Adicione funções de transição ao clicar no botão '+'. Clique aqui para saber mais!">
+                <h2
+                  title="Adicione funções de transição ao clicar no botão '+'. Clique aqui para saber mais!"
+                  onClick={async () => {
+                    await CustomDialog(
+                      <CustomDialogContent typeInformation="3" />,
+                      {
+                        title:
+                          'Informações - Funções de Transição/Função Programa',
+                        showCloseIcon: true,
+                      }
+                    );
+                  }}
+                >
                   3
                 </h2>
                 <input
@@ -607,7 +587,18 @@ export default function Form() {
             </div>
           )}
           <div className={css.flexRow}>
-            <h2 title="Defina uma entrada e inicie o processamento na máquina criada ao clicar no botão 'INICIAR'. Clique aqui para saber mais!">
+            <h2
+              title="Defina uma entrada e inicie o processamento na máquina criada ao clicar no botão 'INICIAR'. Clique aqui para saber mais!"
+              onClick={async () => {
+                await CustomDialog(
+                  <CustomDialogContent typeInformation="4" />,
+                  {
+                    title: 'Informações - Entrada',
+                    showCloseIcon: true,
+                  }
+                );
+              }}
+            >
               4
             </h2>
             <input

@@ -12,7 +12,6 @@ export default function Step({
   updateInput,
   freeInit,
 }) {
-  console.log('input' + input);
   //constante que define localizacao do apontador
   const [pointerControll, setPointerControll] = useState([
     true,
@@ -28,6 +27,8 @@ export default function Step({
   ]);
   //variavel que armazena um contador auxiliar para renderizacao das células da fita
   let counterPointer = 0;
+  //contador que controla quantidade de vezes de execucao automatica para evitar loop infinito
+  const [auxCounter, setAuxCounter] = useState(0);
   //constante que armazena as funcoes de transicao como objetos
   const [funcObject, setFuncObject] = useState([]);
   //constante que armazena o estado atual de processamento
@@ -49,6 +50,10 @@ export default function Step({
   const [firstStep, setFirstStep] = useState(true);
   //constante que armazena o historico de funcoes processadas
   const [historicFuncProcessing, setHistoricFuncProcessing] = useState([]);
+  //constante que controla o processamento automatico
+  const [allSteps, setAllSteps] = useState(false);
+  //constante que controla quantos caracteres do input foram omitidos
+  const [counterCaracter, setCounterCaracter] = useState(0);
 
   /*A partir da atualização da currentFuncProcessing (funcao atual a ser processada)
    * o fluxo de processamento ocorre
@@ -58,43 +63,93 @@ export default function Step({
       let auxArray = pointerControll;
       const indexTrue = pointerControll.indexOf(true);
       if (indexTrue !== 0) {
-        updateInput(currentFuncProcessing.destination.writer, indexTrue - 1);
+        if (indexTrue === 8 && counterCaracter !== 0) {
+          updateInput(
+            currentFuncProcessing.destination.writer,
+            indexTrue - 1 + counterCaracter
+          );
+        } else {
+          updateInput(currentFuncProcessing.destination.writer, indexTrue - 1);
+        }
       }
       switch (currentFuncProcessing.destination.moviment) {
         case '>':
-          auxArray[indexTrue] = false;
-          auxArray[indexTrue + 1] = true;
-          setPointerControll(auxArray);
-          setCurrentState(currentFuncProcessing.destination.state);
-          setCurrentInput({ index: indexTrue, str: input[indexTrue] });
-          break;
-        case '<':
-          if (indexTrue > 0) {
+          if (indexTrue === 8 && input.length >= 8) {
+            //Nao muda pointerControll pois já está no limite
+            setCounterCaracter(counterCaracter + 1);
+            setCurrentState(currentFuncProcessing.destination.state);
+            if (counterCaracter === 0) {
+              setCurrentInput({
+                index: indexTrue,
+                str: input[indexTrue],
+              });
+            } else {
+              setCurrentInput({
+                index: indexTrue + counterCaracter,
+                str: input[indexTrue + counterCaracter],
+              });
+            }
+          } else {
             auxArray[indexTrue] = false;
-            auxArray[indexTrue - 1] = true;
+            auxArray[indexTrue + 1] = true;
             setPointerControll(auxArray);
             setCurrentState(currentFuncProcessing.destination.state);
-            if (indexTrue === 1) {
+            setCurrentInput({ index: indexTrue, str: input[indexTrue] });
+          }
+          break;
+        case '<':
+          if (indexTrue === 8 && input.length >= 8 && counterCaracter !== 0) {
+            setCounterCaracter(counterCaracter - 1);
+            setCurrentState(currentFuncProcessing.destination.state);
+            setCurrentInput({
+              index: indexTrue - 1,
+              str: input[indexTrue - 1],
+            });
+            setCounterCaracter(counterCaracter - 1);
+          } else {
+            if (indexTrue > 0) {
+              auxArray[indexTrue] = false;
+              auxArray[indexTrue - 1] = true;
+              setPointerControll(auxArray);
+              setCurrentState(currentFuncProcessing.destination.state);
+              if (indexTrue === 1) {
+                setCurrentInput({
+                  index: -1,
+                  str: INITIAL_SIMBOL,
+                });
+              } else {
+                setCurrentInput({
+                  index: indexTrue - 2,
+                  str: input[indexTrue - 2],
+                });
+              }
+            } else {
               setCurrentInput({
                 index: -1,
                 str: INITIAL_SIMBOL,
               });
-            } else {
-              setCurrentInput({
-                index: indexTrue - 2,
-                str: input[indexTrue - 2],
-              });
+              setCurrentFunc('Movimento inválido. Palavra Rejeitada!');
             }
-          } else {
-            setCurrentFunc('Movimento inválido. Palavra Rejeitada!');
           }
           break;
         default:
+          setCurrentInput({
+            index: -1,
+            str: INITIAL_SIMBOL,
+          });
           setCurrentFunc('Movimento Inválido!');
           break;
       }
     }
+    // eslint-disable-next-line
   }, [currentFuncProcessing, pointerControll]);
+
+  useEffect(() => {
+    if (allSteps) {
+      handleAllNextStepButtonClick();
+    }
+    // eslint-disable-next-line
+  }, [currentInput]);
 
   /*Método disparado ao clicar no botão de próximo passo
    * Se for o primeiro passo, ele transforma todas as funcoes de transicao em objetos
@@ -181,6 +236,8 @@ export default function Step({
     }
   };
 
+  /*Método que seta a função a ser processada e a exibição de feedback
+   */
   const findTransitionFunction = () => {
     if (currentFunc !== 'Palavra rejeitada!') {
       let functionSelected = funcObject.filter((funcao) => {
@@ -209,7 +266,11 @@ export default function Step({
         let arrayTemp = historicFuncProcessing;
         arrayTemp.push(objCurrentFuncProcessing);
         setHistoricFuncProcessing(arrayTemp);
-      } else if (final.includes(currentState)) {
+      } else if (
+        final.find((state) => {
+          return state === currentState;
+        }) !== undefined
+      ) {
         setCurrentFunc('Palavra Aceita!');
       } else {
         setCurrentFunc('Palavra rejeitada!');
@@ -217,18 +278,42 @@ export default function Step({
     }
   };
 
+  /** Método disparado ao clicar no botão de avançar para o fim do processamento
+   * Exibe feedback final ou aviso de loop
+   */
+  const handleAllNextStepButtonClick = () => {
+    setAllSteps(true);
+    if (
+      currentFunc !== 'Palavra Aceita!' &&
+      currentFunc !== 'Palavra rejeitada!' &&
+      currentFunc !== 'Movimento inválido. Palavra Rejeitada!' &&
+      currentFunc !== 'Movimento Inválido!' &&
+      auxCounter < 100
+    ) {
+      setAuxCounter(auxCounter + 1);
+      handleNextStepButtonClick();
+    } else if (auxCounter >= 100) {
+      setAllSteps(false);
+      setCurrentFunc('Processamento interrompido devido a loop.');
+    } else {
+      setAllSteps(false);
+    }
+  };
+
   /*Método disparado ao clicar no botão de passo anterior
    * Se o apontador estiver no símbolo inicial da fita, não ocorre nenhuma ação
-   * Senao, atualiza dados de processamento de acordo com as funções processadas
+   * Senao, atualiza dados de processamento de acordo com as funções já processadas
    */
   const handlePreviousStepButtonClick = () => {
     setDirection('left');
+    setAllSteps(false);
     if (
       currentFunc !== '' &&
       currentFunc !== 'Nenhum passo anterior para retroceder.'
     ) {
       let auxCounter = -1;
       let indexFunc = -1;
+      // eslint-disable-next-line
       let functionSelected = historicFuncProcessing.filter((funcao) => {
         auxCounter++;
         if (
@@ -244,36 +329,69 @@ export default function Step({
       const indexTrue = pointerControll.indexOf(true);
       switch (currentFuncProcessing.destination.moviment) {
         case '>':
-          if (indexTrue > 1) {
+          if (indexTrue > 1 && indexTrue <= 8 && counterCaracter === 0) {
             updateInput(currentFuncProcessing.origin.input, indexTrue - 2);
           }
-          if (indexTrue > 0) {
-            auxArray[indexTrue] = false;
-            auxArray[indexTrue - 1] = true;
-            setPointerControll(auxArray);
-            if (indexTrue === 1) {
-              setCurrentInput({
-                index: -1,
-                str: INITIAL_SIMBOL,
-              });
-            } else {
-              setCurrentInput({
-                index: indexTrue - 2,
-                str: input[indexTrue - 2],
-              });
-            }
+          if (indexTrue === 8 && input.length >= 8 && counterCaracter !== 0) {
+            updateInput(
+              currentFuncProcessing.origin.input,
+              indexTrue + (counterCaracter - 2)
+            );
+            setCounterCaracter(counterCaracter - 1);
+            setCurrentInput({
+              index: indexTrue - counterCaracter,
+              str: input[indexTrue - counterCaracter],
+            });
+            setCounterCaracter(counterCaracter - 1);
           } else {
-            setCurrentFunc('Movimento inválido. Palavra Rejeitada!');
+            if (indexTrue > 0) {
+              auxArray[indexTrue] = false;
+              auxArray[indexTrue - 1] = true;
+              setPointerControll(auxArray);
+              if (indexTrue === 1) {
+                setCurrentInput({
+                  index: -1,
+                  str: INITIAL_SIMBOL,
+                });
+              } else {
+                setCurrentInput({
+                  index: indexTrue - 2,
+                  str: input[indexTrue - 2],
+                });
+              }
+            } else {
+              setCurrentFunc('Movimento inválido. Palavra Rejeitada!');
+            }
           }
           break;
         case '<':
-          if (indexTrue < input.length) {
+          if (indexTrue < input.length && indexTrue < 8) {
             updateInput(currentFuncProcessing.origin.input, indexTrue);
           }
-          auxArray[indexTrue] = false;
-          auxArray[indexTrue + 1] = true;
-          setPointerControll(auxArray);
-          setCurrentInput({ index: indexTrue, str: input[indexTrue] });
+          if (indexTrue === 8 && input.length >= 8) {
+            updateInput(
+              currentFuncProcessing.origin.input,
+              indexTrue + counterCaracter
+            );
+            //Nao muda pointerControll pois já está no limite
+            setCounterCaracter(counterCaracter + 1);
+            if (counterCaracter === 0) {
+              setCurrentInput({
+                index: indexTrue,
+                str: input[indexTrue],
+              });
+            } else {
+              setCurrentInput({
+                index: indexTrue + counterCaracter,
+                str: input[indexTrue + counterCaracter],
+              });
+            }
+          } else {
+            auxArray[indexTrue] = false;
+            auxArray[indexTrue + 1] = true;
+            setPointerControll(auxArray);
+            setCurrentInput({ index: indexTrue, str: input[indexTrue] });
+          }
           break;
         default:
           setCurrentFunc('Movimento Inválido!');
@@ -282,7 +400,10 @@ export default function Step({
 
       if (functionSelected.length > 0 && indexFunc !== -1) {
         setCurrentState(currentFuncProcessing.origin.state);
-        if (currentFuncProcessing.origin.input === INITIAL_SIMBOL) {
+        if (
+          currentFuncProcessing.origin.input === INITIAL_SIMBOL &&
+          indexFunc === 0
+        ) {
           setCurrentFunc('');
           setCurrentFuncProcessing();
           setHistoricFuncProcessing([]);
@@ -298,7 +419,13 @@ export default function Step({
     }
   };
 
+  /*Método disparado ao clicar no botão de resetar processamento
+   * Se o apontador estiver no símbolo inicial da fita, não ocorre nenhuma ação
+   * Senao, reseta os dados de processamento
+   */
   const handleAllPreviousStepButtonClick = () => {
+    setAllSteps(false);
+    setAuxCounter(0);
     if (!firstStep) {
       updateInput(copyInput, -1);
       setCurrentState(initial);
@@ -324,6 +451,8 @@ export default function Step({
       freeInit();
       setFirstStep(true);
       setHistoricFuncProcessing([]);
+      counterPointer = 0;
+      setCounterCaracter(0);
     }
   };
 
@@ -345,13 +474,21 @@ export default function Step({
                   pointer === true &&
                   index < pointerControll.length - 1
                 ) {
-                  return <td style={styles.tdSelected}>{input[index - 1]}</td>;
+                  return (
+                    <td style={styles.tdSelected}>
+                      {input[index - 1 + counterCaracter]}
+                    </td>
+                  );
                 } else if (
                   index !== 0 &&
                   pointer === false &&
                   index < pointerControll.length - 1
                 ) {
-                  return <td style={styles.td}>{input[index - 1]}</td>;
+                  return (
+                    <td style={styles.td}>
+                      {input[index - 1 + counterCaracter]}
+                    </td>
+                  );
                 } else {
                   return <td style={styles.td}>...</td>;
                 }
@@ -391,7 +528,7 @@ export default function Step({
         <a
           className="waves-effect waves-light btn"
           href="#!"
-          onClick={handleNextStepButtonClick}
+          onClick={handleAllNextStepButtonClick}
           style={{ fontSize: 'x-large' }}
           title="Avança até o último passo do processamento da entrada, exibindo o feedback final"
         >
