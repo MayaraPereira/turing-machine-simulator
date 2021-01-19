@@ -90,11 +90,18 @@ export default function Step({
               });
             }
           } else {
-            auxArray[indexTrue] = false;
-            auxArray[indexTrue + 1] = true;
-            setPointerControll(auxArray);
-            setCurrentState(currentFuncProcessing.destination.state);
-            setCurrentInput({ index: indexTrue, str: input[indexTrue] });
+            if (
+              indexTrue === 0 &&
+              currentFuncProcessing.destination.writer !== INITIAL_SIMBOL
+            ) {
+              setCurrentFunc('Palavra Rejeitada!');
+            } else {
+              auxArray[indexTrue] = false;
+              auxArray[indexTrue + 1] = true;
+              setPointerControll(auxArray);
+              setCurrentState(currentFuncProcessing.destination.state);
+              setCurrentInput({ index: indexTrue, str: input[indexTrue] });
+            }
           }
           break;
         case '<':
@@ -468,7 +475,11 @@ export default function Step({
                 if (index === 0 && pointer === true) {
                   return <td style={styles.tdSelected}>{INITIAL_SIMBOL}</td>;
                 } else if (index === 0 && pointer !== true) {
-                  return <td style={styles.td}>{INITIAL_SIMBOL}</td>;
+                  if (counterCaracter > 0) {
+                    return <td style={styles.tdComplement}>...</td>;
+                  } else {
+                    return <td style={styles.td}>{INITIAL_SIMBOL}</td>;
+                  }
                 } else if (
                   index !== 0 &&
                   pointer === true &&
@@ -490,7 +501,7 @@ export default function Step({
                     </td>
                   );
                 } else {
-                  return <td style={styles.td}>...</td>;
+                  return <td style={styles.tdComplement}>...</td>;
                 }
               })}
             </tr>
@@ -520,7 +531,7 @@ export default function Step({
           className="waves-effect waves-light btn"
           href="#!"
           onClick={handleAllPreviousStepButtonClick}
-          style={{ marginRight: '0.5rem', fontSize: 'x-large' }}
+          style={{ marginRight: '0.2rem', fontSize: 'x-large', width: '52px' }}
           title="Reseta todo o processamento, liberando a troca de entrada, caso desejado"
         >
           ⭰
@@ -529,7 +540,7 @@ export default function Step({
           className="waves-effect waves-light btn"
           href="#!"
           onClick={handleAllNextStepButtonClick}
-          style={{ fontSize: 'x-large' }}
+          style={{ fontSize: 'x-large', width: '52px' }}
           title="Avança até o último passo do processamento da entrada, exibindo o feedback final"
         >
           ⭲
@@ -540,19 +551,20 @@ export default function Step({
           <a
             className="waves-effect waves-light btn"
             href="#!"
-            style={{ marginRight: '2%' }}
+            style={{ marginRight: '0.2rem', fontSize: '1.5rem', width: '52px' }}
             onClick={handlePreviousStepButtonClick}
             title="Retrocede um passo no processamento da entrada"
           >
-            ◂◂
+            ◄
           </a>
           <a
             className="waves-effect waves-light btn"
             href="#!"
+            style={{ fontSize: '1.5rem', width: '52px' }}
             onClick={handleNextStepButtonClick}
             title="Avança um passo no processamento da entrada"
           >
-            ▸▸
+            ►
           </a>
         </div>
         <div style={styles.legendFooter}>
@@ -593,6 +605,12 @@ const styles = {
     padding: '8px 12px',
     textAlign: 'center',
   },
+  tdComplement: {
+    border: '1px solid white',
+    backgroundColor: 'white',
+    color: 'black',
+    textAlign: 'center',
+  },
   tablePointer: {
     border: '1px solid white',
     borderCollapse: 'collapse',
@@ -622,9 +640,10 @@ const styles = {
   iconPointer: {
     fontSize: '3.5rem',
     fontWeight: 'bold',
+    marginBottom: '-1rem',
   },
   spanPointer: {
-    border: '1px solid',
+    border: '3px solid',
     paddingTop: '9px',
     paddingBottom: '9px',
     minWidth: '3rem',

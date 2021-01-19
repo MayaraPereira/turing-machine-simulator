@@ -28,6 +28,10 @@ export default function Form() {
       str:
         '▷ : símbolo marcador de início da fita. Copie e cole para incluir a função programa que inicia o processamento.',
     },
+    {
+      id: 4,
+      str: '_ : símbolo que representa o branco (β).',
+    },
   ]);
   //constante que armazena primeira parte da funcao de transicao incluida pelo usuario
   const [funcOne, setFuncOne] = useState();
@@ -82,6 +86,7 @@ export default function Form() {
       arrayStates.push(currentStates[0]);
       arrayStates.push(currentStates[1]);
       arrayStates.push(currentStates[2]);
+      arrayStates.push(currentStates[3]);
 
       arrayStates[0].str = strFormat;
       setCurrentStates(arrayStates);
@@ -120,6 +125,7 @@ export default function Form() {
       arrayStates.push(currentStates[0]);
       arrayStates.push(currentStates[1]);
       arrayStates.push(currentStates[2]);
+      arrayStates.push(currentStates[3]);
 
       arrayStates[1].str = strFormat;
       setCurrentStates(arrayStates);
@@ -131,7 +137,12 @@ export default function Form() {
     if (funcOne && funcTwo) {
       let strFormat = PI + '(';
       let existFunc = false;
-      if (funcOne.indexOf(',') !== -1 && funcTwo.indexOf(',') !== -1) {
+      if (
+        funcOne.indexOf(',') !== -1 &&
+        funcTwo.indexOf(',') !== -1 &&
+        funcOne.match(/,/g).length === 1 &&
+        funcTwo.match(/,/g).length === 2
+      ) {
         //nao permite duplicidade
         currentFunctions.map((func) => {
           if (func.str.includes(funcOne.replace(/( )+/g, '') + ')')) {
@@ -337,6 +348,10 @@ export default function Form() {
         str:
           '▷ : símbolo marcador de início da fita. Copie e cole para incluir a função programa que inicia o processamento.',
       },
+      {
+        id: 4,
+        str: '_ : símbolo que representa o branco (β).',
+      },
     ]);
     setFuncOne();
     setFuncTwo();
@@ -470,35 +485,29 @@ export default function Form() {
                 >
                   3
                 </h2>
-                <input
+                <span
                   style={styles.firstInputDisabled}
-                  placeholder={`${PI}(`}
                   alt="função de transição"
-                  disabled
-                />
+                >{`${PI}(`}</span>
                 <input
                   style={styles.firstInput}
                   title="função de transição"
                   placeholder="p, au"
                   onChange={handleFirstInputChange}
                 />
-                <input
+                <span
                   style={styles.secondInputDisabled}
-                  placeholder=") = ("
                   title="função de transição"
-                  disabled
-                />
+                >
+                  ) = (
+                </span>
                 <input
                   style={styles.secondInput}
                   title="função de transição"
                   placeholder="q, av, m"
                   onChange={handleSecondInputChange}
                 />
-                <input
-                  style={styles.thirdInputDisabled}
-                  placeholder=")"
-                  disabled
-                />
+                <span style={styles.thirdInputDisabled}>)</span>
                 <a
                   className="btn-floating btn-small waves-effect waves-light"
                   href="#!"
@@ -568,6 +577,12 @@ export default function Form() {
                     >
                       x
                     </a>
+                  </div>
+                  <div style={{ paddingBottom: '1rem' }}>
+                    <span style={{ fontSize: '12px' }}>
+                      *Caso a função não seja modificada ou excluída, tente
+                      editar os dois inputs novamente e confirmar a operação.
+                    </span>
                   </div>
                   <div>
                     <span>Resetar a máquina:</span>
