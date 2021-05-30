@@ -570,7 +570,7 @@ export default function Step({
         <div style={styles.legendFooter}>
           <span
             style={styles.legendFeedback}
-            title="Exibe feedback final ou função de transição que foi utilizada para o processamento da entrada"
+            title="Exibe feedback final ou configuração da função de transição que foi utilizada para o processamento da entrada"
           >
             Função processada: {currentFunc}
           </span>

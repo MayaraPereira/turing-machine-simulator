@@ -3,7 +3,7 @@ import { CustomDialog } from 'react-st-modal';
 
 import css from './form.module.css';
 import Table from '../Table/Table';
-import Step from '../Steps/Step';
+import Step from '../Step/Step';
 import CustomDialogContent from '../Modal/CustomDialogContent';
 
 const PI = 'Π';
@@ -26,11 +26,16 @@ export default function Form() {
     {
       id: 3,
       str:
-        '▷ : símbolo marcador de início da fita. Copie e cole para incluir a função programa que inicia o processamento.',
+        '▷ : símbolo marcador de início da fita. Copie e cole para incluir a configuração da função de transição que inicia o processamento.',
     },
     {
       id: 4,
       str: '_ : símbolo que representa o branco (β).',
+    },
+    {
+      id: 5,
+      str:
+        '< ou >: símbolos que representam o movimento para a esquerda ou para a direita, respectivamente.',
     },
   ]);
   //constante que armazena primeira parte da funcao de transicao incluida pelo usuario
@@ -87,6 +92,7 @@ export default function Form() {
       arrayStates.push(currentStates[1]);
       arrayStates.push(currentStates[2]);
       arrayStates.push(currentStates[3]);
+      arrayStates.push(currentStates[4]);
 
       arrayStates[0].str = strFormat;
       setCurrentStates(arrayStates);
@@ -126,6 +132,7 @@ export default function Form() {
       arrayStates.push(currentStates[1]);
       arrayStates.push(currentStates[2]);
       arrayStates.push(currentStates[3]);
+      arrayStates.push(currentStates[4]);
 
       arrayStates[1].str = strFormat;
       setCurrentStates(arrayStates);
@@ -214,7 +221,11 @@ export default function Form() {
       setLookInput(value.replace(/( )+/g, ''));
     }
 
-    if (initialState && finalStates && currentFunctions.length > 1) {
+    if (
+      initialState.length > 0 &&
+      finalStates.length > 0 &&
+      currentFunctions.length > 1
+    ) {
       setAllowedStart(false);
     } else {
       setAllowedStart(true);
@@ -346,11 +357,16 @@ export default function Form() {
       {
         id: 3,
         str:
-          '▷ : símbolo marcador de início da fita. Copie e cole para incluir a função programa que inicia o processamento.',
+          '▷ : símbolo marcador de início da fita. Copie e cole para incluir a configuração da função de transição que inicia o processamento.',
       },
       {
         id: 4,
         str: '_ : símbolo que representa o branco (β).',
+      },
+      {
+        id: 5,
+        str:
+          '< ou >: símbolos que representam o movimento para a esquerda ou para a direita, respectivamente.',
       },
     ]);
     setFuncOne();
@@ -471,13 +487,12 @@ export default function Form() {
               </div>
               <div className={css.flexRow}>
                 <h2
-                  title="Adicione funções de transição ao clicar no botão '+'. Clique aqui para saber mais!"
+                  title="Adicione configurações da função de transição ao clicar no botão '+'. Clique aqui para saber mais!"
                   onClick={async () => {
                     await CustomDialog(
                       <CustomDialogContent typeInformation="3" />,
                       {
-                        title:
-                          'Informações - Funções de Transição/Função Programa',
+                        title: 'Informações - Função de Transição/Programa',
                         showCloseIcon: true,
                       }
                     );
@@ -520,7 +535,7 @@ export default function Form() {
                   className="btn-floating btn-small waves-effect waves-light"
                   href="#!"
                   style={styles.buttonFunctionStep}
-                  title="Clique aqui para acessar as opções de edição das funções de transição ou reset de máquina."
+                  title="Clique aqui para acessar as opções de edição de configurações da função de transição ou reset de máquina."
                   onClick={handleEditFunctionsButtonClick}
                 >
                   {editSimbol}
@@ -535,7 +550,7 @@ export default function Form() {
                     <span>X</span>
                   </div>
                   <span style={{ marginBottom: '0.5rem' }}>
-                    Editar ou excluir função de transição:
+                    Editar ou excluir configuração da função de transição:
                   </span>
                   <div style={{ padding: '1rem' }}>
                     <span style={{ marginRight: '0.3rem' }}>{`${PI}(`}</span>
@@ -564,7 +579,7 @@ export default function Form() {
                       href="#!"
                       style={styles.buttonFunctionStep}
                       onClick={handleEditFunctionButtonClick}
-                      title="Clique aqui para confirmar a edição da função informada"
+                      title="Clique aqui para confirmar a edição da configuração informada"
                     >
                       ok
                     </a>
@@ -573,15 +588,16 @@ export default function Form() {
                       href="#!"
                       style={styles.buttonFunctionStep}
                       onClick={handleDeleteFunctionButtonClick}
-                      title="Clique aqui para confirmar a exclusão da função informada"
+                      title="Clique aqui para confirmar a exclusão da configuração informada"
                     >
                       x
                     </a>
                   </div>
                   <div style={{ paddingBottom: '1rem' }}>
                     <span style={{ fontSize: '12px' }}>
-                      *Caso a função não seja modificada ou excluída, tente
-                      editar os dois inputs novamente e confirmar a operação.
+                      *Caso a configuração da função não seja modificada ou
+                      excluída, tente editar os dois inputs novamente e
+                      confirmar a operação.
                     </span>
                   </div>
                   <div>
@@ -650,7 +666,7 @@ export default function Form() {
         </div>
       </div>
       <div className={css.flexRowElements}>
-        <Table func={currentFunctions} title="Funções de Transição" />
+        <Table func={currentFunctions} title="Função de Transição" />
         <Table func={currentStates} title="Informações de Processamento" />
       </div>
       {input[0] !== '-' && toOmit && (

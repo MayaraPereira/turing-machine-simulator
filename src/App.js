@@ -28,7 +28,7 @@ export default function App() {
             </li>
             <li>
               <a href="/instructions" style={styles.optionsMenu}>
-                Como usar?
+                Instruções
               </a>
             </li>
             <li>
@@ -41,15 +41,10 @@ export default function App() {
       </nav>
 
       <div className="container">
-        <h1 style={styles.centeredTitle}>Turing Machine Simulator</h1>
+        <h1 style={styles.centeredTitle}>TuringMS</h1>
 
         <div style={{ justifyContent: 'center' }}>
-          <Form
-          /*filter={filter}
-        countryCount={filteredCountries.length}
-        totalPopulation={filteredPopulation}
-        onChangeFilter={handleChangeFilter}*/
-          />
+          <Form />
         </div>
       </div>
     </Fragment>
