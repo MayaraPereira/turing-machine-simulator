@@ -316,7 +316,9 @@ export default function Step({
     setAllSteps(false);
     if (
       currentFunc !== '' &&
-      currentFunc !== 'Nenhum passo anterior para retroceder.'
+      currentFunc !== 'Nenhum passo anterior para retroceder.' &&
+      currentFunc !== 'Movimento inválido. Palavra Rejeitada!' &&
+      currentFunc.indexOf('▷') === -1
     ) {
       let auxCounter = -1;
       let indexFunc = -1;
@@ -347,7 +349,7 @@ export default function Step({
             setCounterCaracter(counterCaracter - 1);
             setCurrentInput({
               index: indexTrue - counterCaracter,
-              str: input[indexTrue - counterCaracter],
+              str: currentFuncProcessing.origin.input,
             });
             setCounterCaracter(counterCaracter - 1);
           } else {
@@ -363,7 +365,7 @@ export default function Step({
               } else {
                 setCurrentInput({
                   index: indexTrue - 2,
-                  str: input[indexTrue - 2],
+                  str: currentFuncProcessing.origin.input,
                 });
               }
             } else {
@@ -372,6 +374,7 @@ export default function Step({
           }
           break;
         case '<':
+          debugger;
           if (indexTrue < input.length && indexTrue < 8) {
             updateInput(currentFuncProcessing.origin.input, indexTrue);
           }
@@ -385,19 +388,22 @@ export default function Step({
             if (counterCaracter === 0) {
               setCurrentInput({
                 index: indexTrue,
-                str: input[indexTrue],
+                str: currentFuncProcessing.origin.input,
               });
             } else {
               setCurrentInput({
                 index: indexTrue + counterCaracter,
-                str: input[indexTrue + counterCaracter],
+                str: currentFuncProcessing.origin.input,
               });
             }
           } else {
             auxArray[indexTrue] = false;
             auxArray[indexTrue + 1] = true;
             setPointerControll(auxArray);
-            setCurrentInput({ index: indexTrue, str: input[indexTrue] });
+            setCurrentInput({
+              index: indexTrue,
+              str: currentFuncProcessing.origin.input,
+            });
           }
           break;
         default:
@@ -411,10 +417,14 @@ export default function Step({
           currentFuncProcessing.origin.input === INITIAL_SIMBOL &&
           indexFunc === 0
         ) {
-          setCurrentFunc('');
+          //setCurrentFunc('');
+          let objCurrentFunc =
+            func[functionSelected[functionSelected.length - 1].id - 1];
+          setCurrentFunc(objCurrentFunc.str);
           setCurrentFuncProcessing();
           setHistoricFuncProcessing([]);
         } else {
+          debugger;
           let objCurrentFunc =
             func[functionSelected[functionSelected.length - 1].id - 1];
           setCurrentFunc(objCurrentFunc.str);
@@ -460,6 +470,8 @@ export default function Step({
       setHistoricFuncProcessing([]);
       counterPointer = 0;
       setCounterCaracter(0);
+    } else {
+      setCurrentFunc('Nenhum passo anterior para retroceder.');
     }
   };
 
@@ -532,7 +544,7 @@ export default function Step({
           href="#!"
           onClick={handleAllPreviousStepButtonClick}
           style={{ marginRight: '0.2rem', fontSize: 'x-large', width: '52px' }}
-          title="Reseta todo o processamento, liberando a troca de entrada, caso desejado"
+          title="Reseta todo o processamento."
         >
           ⭰
         </a>
