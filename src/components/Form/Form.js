@@ -48,15 +48,15 @@ export default function Form() {
   const [editFuncTwo, setEditFuncTwo] = useState();
   //constante que armazena entrada a ser processada
   const [input, setInput] = useState([
-    '-',
-    '-',
-    '-',
-    '-',
-    '-',
-    '-',
-    '-',
-    '-',
-    '-',
+    '_',
+    '_',
+    '_',
+    '_',
+    '_',
+    '_',
+    '_',
+    '_',
+    '_',
   ]);
   //constante que armazena entrada digitada pelo usuario
   const [lookInput, setLookInput] = useState();
@@ -214,7 +214,7 @@ export default function Form() {
       let size = value.replace(/( )+/g, '').length;
       let white = value.replace(/( )+/g, '');
       for (let index = size - 1; index < 8; index++) {
-        white += '-';
+        white += '_';
       }
       setLookInput(white);
     } else {
@@ -373,7 +373,7 @@ export default function Form() {
     setFuncTwo();
     setEditFuncOne();
     setEditFuncTwo();
-    setInput(['-', '-', '-', '-', '-', '-', '-', '-', '-']);
+    setInput(['_', '_', '_', '_', '_', '_', '_', '_', '_']);
     setLookInput();
     setInitialState();
     setLookInitialState();
@@ -669,7 +669,7 @@ export default function Form() {
         <Table func={currentFunctions} title="Função de Transição" />
         <Table func={currentStates} title="Informações de Processamento" />
       </div>
-      {input[0] !== '-' && toOmit && (
+      {input[0] !== '_' && toOmit && (
         <Step
           func={currentFunctions}
           input={input}

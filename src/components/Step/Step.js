@@ -374,7 +374,6 @@ export default function Step({
           }
           break;
         case '<':
-          debugger;
           if (indexTrue < input.length && indexTrue < 8) {
             updateInput(currentFuncProcessing.origin.input, indexTrue);
           }
@@ -424,7 +423,6 @@ export default function Step({
           setCurrentFuncProcessing();
           setHistoricFuncProcessing([]);
         } else {
-          debugger;
           let objCurrentFunc =
             func[functionSelected[functionSelected.length - 1].id - 1];
           setCurrentFunc(objCurrentFunc.str);
